@@ -1,0 +1,6 @@
+[Unit]
+Description=Idle-stop watcher run for mortgage-backend
+
+[Service]
+Type=oneshot
+ExecStart=/opt/projects/mortgage-knowledge-assistant/infra/scripts/idle_stop_watcher.sh

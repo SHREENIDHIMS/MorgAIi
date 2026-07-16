@@ -1,0 +1,26 @@
+[Unit]
+Description=Mortgage Knowledge Assistant - FastAPI backend (on-demand)
+Requires=mortgage-backend.socket
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/projects/mortgage-knowledge-assistant/backend
+EnvironmentFile=/opt/projects/mortgage-knowledge-assistant/backend/.env
+
+# --workers 1: never run more than one Uvicorn worker on this box —
+# each worker duplicates the full app footprint in memory.
+#
+# fd 3 is the systemd convention: fds 0/1/2 are stdio, so the first
+# socket systemd hands off via socket activation is fd 3.
+ExecStart=/opt/projects/mortgage-knowledge-assistant/backend/.venv/bin/uvicorn \
+    app.main:app --workers 1 --fd 3
+
+MemoryMax=200M
+CPUWeight=50
+
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
