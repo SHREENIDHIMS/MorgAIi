@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledger — Mortgage Knowledge Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111217;
+  --bg-elevated:#16181e;
+  --surface:#1a1c23;
+  --surface-2:#20222b;
+  --surface-3:#262833;
+  --border:#2a2d38;
+  --border-soft:#22242d;
+  --text:#e9e7e1;
+  --text-dim:#a3a5b1;
+  --text-faint:#6d6f7c;
+  --accent:#7C9CE8;
+  --accent-strong:#9AB4F0;
+  --accent-soft:rgba(124,156,232,.12);
+  --accent-soft-2:rgba(124,156,232,.22);
+  --tier-high:#5FA876;
+  --tier-high-bg:rgba(95,168,118,.10);
+  --tier-medium:#CC9A46;
+  --tier-medium-bg:rgba(204,154,70,.10);
+  --tier-low:#C8735A;
+  --tier-low-bg:rgba(200,115,90,.10);
+  --tier-none:#8A8D9B;
+  --tier-none-bg:rgba(138,141,155,.10);
+  --danger:#D6685E;
+  --danger-bg:rgba(214,104,94,.10);
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --font-serif:'Source Serif 4',Georgia,serif;
+  --r-sm:6px; --r-md:10px; --r-lg:16px; --r-pill:999px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.45);
+  --shadow-md:0 8px 24px rgba(0,0,0,.4);
+  --shadow-lg:0 16px 48px rgba(0,0,0,.5);
+  --sidebar-w:236px;
+  --ease-settle: cubic-bezier(.22,1.4,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-sans);
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;color:inherit;}
+input,textarea,select{font-family:inherit;color:inherit;}
+a{color:inherit;}
+::selection{background:var(--accent-soft-2);}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:99px;border:2px solid var(--bg);}
+.mono{font-family:var(--font-mono);}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+}
+
+/* ---------- layout ---------- */
+.app-shell{display:flex; min-height:100vh;}
+.sidebar{
+  width:var(--sidebar-w); flex:0 0 auto; background:var(--bg-elevated);
+  border-right:1px solid var(--border-soft); display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh;
+}
+.brand{display:flex; align-items:center; gap:var(--sp-3); padding:var(--sp-5) var(--sp-4) var(--sp-4);}
+.brand-mark{width:28px; height:28px; border:1.5px solid var(--accent); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--accent); flex:0 0 auto; transform:rotate(-3deg);}
+.brand-name{font-weight:600; font-size:1.05rem; letter-spacing:.01em;}
+.brand-sub{font-family:var(--font-mono); font-size:.66rem; color:var(--text-faint); letter-spacing:.08em; text-transform:uppercase; margin-top:1px;}
+.nav{padding:var(--sp-3) var(--sp-3); display:flex; flex-direction:column; gap:2px; flex:1 1 auto; overflow-y:auto;}
+.nav-group-label{font-family:var(--font-mono); font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-faint); padding:var(--sp-4) var(--sp-3) var(--sp-1);}
+.nav-item{
+  display:flex; align-items:center; gap:var(--sp-3); padding:9px 12px; border-radius:var(--r-sm);
+  background:transparent; border:none; text-align:left; cursor:pointer; color:var(--text-dim);
+  font-size:.875rem; font-weight:500; position:relative; transition:background .15s ease, color .15s ease;
+}
+.nav-item svg{flex:0 0 auto; opacity:.85;}
+.nav-item:hover{background:var(--surface-2); color:var(--text);}
+.nav-item.active{background:var(--accent-soft); color:var(--accent-strong);}
+.nav-item.active::before{content:''; position:absolute; left:-12px; top:6px; bottom:6px; width:3px; border-radius:2px; background:var(--accent);}
+.sidebar-footer{border-top:1px solid var(--border-soft); padding:var(--sp-3); display:flex; flex-direction:column; gap:2px;}
+.role-chip{display:flex; align-items:center; gap:var(--sp-3); padding:8px 10px; border-radius:var(--r-sm);}
+.role-avatar{width:28px; height:28px; border-radius:50%; background:var(--surface-3); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:.7rem; font-weight:600; color:var(--accent-strong); flex:0 0 auto;}
+.role-meta{min-width:0;}
+.role-meta .name{font-size:.82rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.role-meta .role{font-size:.7rem; color:var(--text-faint); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.04em;}
+
+.main{flex:1 1 auto; min-width:0; display:flex; flex-direction:column;}
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:var(--sp-4) var(--sp-6); border-bottom:1px solid var(--border-soft); background:var(--bg);}
+.topbar-title{font-size:.95rem; font-weight:600;}
+.topbar-crumb{font-family:var(--font-mono); font-size:.68rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:2px;}
+.view-root{flex:1 1 auto; padding:var(--sp-6); max-width:1180px; width:100%; margin:0 auto;}
+.view-root.narrow{max-width:840px;}
+
+/* ---------- buttons / inputs ---------- */
+.btn{display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--surface-2); cursor:pointer; font-size:.85rem; font-weight:600; transition:all .15s ease;}
+.btn:hover{background:var(--surface-3); border-color:var(--text-faint);}
+.btn-primary{background:var(--accent); border-color:var(--accent); color:#12141a;}
+.btn-primary:hover{background:var(--accent-strong); border-color:var(--accent-strong);}
+.btn-ghost{background:transparent; border-color:transparent;}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-danger{color:var(--danger);}
+.btn-sm{padding:6px 11px; font-size:.78rem;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.icon-btn{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; border:1px solid transparent; background:transparent; cursor:pointer; color:var(--text-dim); transition:all .15s ease;}
+.icon-btn:hover{background:var(--surface-2); color:var(--text);}
+.text-input{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm); padding:10px 12px; font-size:.875rem; color:var(--text);}
+.text-input:focus{border-color:var(--accent);}
+.field-label{display:block; font-size:.78rem; font-weight:600; color:var(--text-dim); margin-bottom:6px;}
+.field{margin-bottom:var(--sp-4);}
+.select-input{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-sm); padding:10px 12px; font-size:.875rem;}
+
+/* ---------- switch ---------- */
+.switch{position:relative; width:38px; height:22px; border-radius:99px; background:var(--surface-3); border:1px solid var(--border); cursor:pointer; flex:0 0 auto; transition:background .15s ease;}
+.switch::after{content:''; position:absolute; width:16px; height:16px; border-radius:50%; background:var(--text-faint); top:2px; left:2px; transition:transform .18s var(--ease-settle), background .15s ease;}
+.switch.on{background:var(--accent-soft-2); border-color:var(--accent);}
+.switch.on::after{transform:translateX(16px); background:var(--accent);}
+
+/* ---------- badges ---------- */
+.badge{display:inline-flex; align-items:center; gap:5px; font-family:var(--font-mono); font-size:.68rem; letter-spacing:.04em; text-transform:uppercase; padding:3px 8px; border-radius:5px; font-weight:600; border:1px solid transparent;}
+.badge-dot{width:6px; height:6px; border-radius:50%; flex:0 0 auto;}
+.badge-active{color:var(--tier-high); background:var(--tier-high-bg); border-color:rgba(95,168,118,.3);}
+.badge-active .badge-dot{background:var(--tier-high);}
+.badge-pending{color:var(--tier-medium); background:var(--tier-medium-bg); border-color:rgba(204,154,70,.3);}
+.badge-pending .badge-dot{background:var(--tier-medium);}
+.badge-failed{color:var(--danger); background:var(--danger-bg); border-color:rgba(214,104,94,.3);}
+.badge-failed .badge-dot{background:var(--danger);}
+.badge-neutral{color:var(--text-dim); background:var(--surface-3); border-color:var(--border);}
+.badge-neutral .badge-dot{background:var(--text-faint);}
+
+/* ---------- login ---------- */
+.login-shell{min-height:100vh; display:flex; align-items:center; justify-content:center; background:
+  radial-gradient(ellipse 900px 500px at 50% -10%, rgba(124,156,232,.10), transparent 60%), var(--bg);}
+.login-card{width:100%; max-width:380px; padding:var(--sp-6); }
+.login-brand{display:flex; flex-direction:column; align-items:center; margin-bottom:var(--sp-6); text-align:center;}
+.login-brand .brand-mark{width:44px; height:44px; border-radius:10px; margin-bottom:var(--sp-4);}
+.login-brand h1{font-size:1.3rem; margin:0 0 4px;}
+.login-brand p{margin:0; color:var(--text-faint); font-size:.82rem;}
+.login-error{display:flex; gap:8px; align-items:flex-start; background:var(--danger-bg); border:1px solid rgba(214,104,94,.3); color:var(--danger); padding:10px 12px; border-radius:var(--r-sm); font-size:.8rem; margin-bottom:var(--sp-4);}
+.role-picker{display:flex; flex-direction:column; gap:8px; margin-bottom:var(--sp-5);}
+.role-option{display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-radius:var(--r-md); border:1px solid var(--border); background:var(--surface-2); cursor:pointer; transition:all .15s ease;}
+.role-option:hover{border-color:var(--accent);}
+.role-option.selected{border-color:var(--accent); background:var(--accent-soft);}
+.role-option .rname{font-size:.85rem; font-weight:600;}
+.role-option .rdesc{font-size:.72rem; color:var(--text-faint); margin-top:1px;}
+
+/* ---------- search hero ---------- */
+.search-hero{text-align:center; padding:var(--sp-7) 0 var(--sp-5);}
+.search-hero h1{font-size:1.65rem; margin:0 0 8px; font-weight:600; letter-spacing:-.01em;}
+.search-hero p{margin:0; color:var(--text-faint); font-size:.9rem;}
+.search-bar-wrap{position:sticky; top:0; z-index:5; padding-bottom:var(--sp-5); background:linear-gradient(var(--bg) 70%, transparent);}
+.search-bar{display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--r-pill); padding:6px 8px 6px 20px; box-shadow:var(--shadow-sm); transition:border-color .15s ease, box-shadow .15s ease;}
+.search-bar:focus-within{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+.search-bar input{flex:1 1 auto; background:transparent; border:none; outline:none; font-size:.92rem; color:var(--text); min-width:0;}
+.search-bar input::placeholder{color:var(--text-faint);}
+.search-submit{width:38px; height:38px; border-radius:50%; background:var(--accent); border:none; color:#12141a; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto;}
+.search-submit:disabled{background:var(--surface-3); color:var(--text-faint); cursor:default;}
+
+/* ---------- mic button ---------- */
+.mic-btn{position:relative; width:38px; height:38px; border-radius:50%; border:1px solid var(--border); background:var(--surface-3); color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; overflow:visible; transition:all .15s ease;}
+.mic-btn:hover{color:var(--text);}
+.mic-btn.listening{background:var(--accent); border-color:var(--accent); color:#12141a;}
+.mic-btn.denied{color:var(--danger);}
+.mic-ring{position:absolute; inset:-4px; border-radius:50%; border:1.5px solid var(--accent); opacity:0; pointer-events:none;}
+.mic-btn.listening .mic-ring{animation:mic-pulse 1.6s ease-out infinite;}
+.mic-ring.r2{animation-delay:.5s !important;}
+@keyframes mic-pulse{0%{transform:scale(.85); opacity:.65;} 100%{transform:scale(1.9); opacity:0;}}
+.waveform{display:flex; align-items:center; gap:2px; height:16px;}
+.waveform span{width:2.5px; border-radius:2px; background:#12141a; display:block; animation:wave-bounce .8s ease-in-out infinite; transform-origin:center;}
+.waveform span:nth-child(1){animation-delay:0s;}
+.waveform span:nth-child(2){animation-delay:.12s;}
+.waveform span:nth-child(3){animation-delay:.24s;}
+.waveform span:nth-child(4){animation-delay:.36s;}
+@keyframes wave-bounce{0%,100%{transform:scaleY(.45);} 50%{transform:scaleY(1);}}
+
+.voice-status-row{display:flex; align-items:center; justify-content:center; gap:8px; padding-top:10px; font-family:var(--font-mono); font-size:.72rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; min-height:20px;}
+.voice-status-row.live{color:var(--accent-strong);}
+.voice-status-row .cancel-link{text-transform:none; letter-spacing:0; font-family:var(--font-sans); color:var(--text-dim); text-decoration:underline; cursor:pointer; background:none; border:none; font-size:.75rem;}
+
+/* ---------- example chips ---------- */
+.chip-grid{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:0 var(--sp-4);}
+.chip{padding:8px 14px; border-radius:var(--r-pill); border:1px solid var(--border); background:var(--surface-2); font-size:.8rem; color:var(--text-dim); cursor:pointer; transition:all .15s ease;}
+.chip:hover{border-color:var(--accent); color:var(--text);}
+
+/* ---------- scan loader (search / processing — never a spinner) ---------- */
+.scan-loader{margin-top:var(--sp-5); display:flex; flex-direction:column; align-items:center; gap:14px;}
+.retrieval-pill{display:inline-flex; align-items:center; gap:9px; background:var(--surface-2); border:1px solid var(--border); padding:8px 16px; border-radius:var(--r-pill); box-shadow:var(--shadow-sm);}
+.retrieval-pill .spark{color:var(--accent-strong); display:flex; animation:spark-spin 1.1s linear infinite;}
+@keyframes spark-spin{from{transform:rotate(0deg);} to{transform:rotate(360deg);}}
+.retrieval-pill .phrase{font-size:.82rem; color:var(--text-dim); font-weight:500; animation:phrase-fade .5s ease;}
+@keyframes phrase-fade{from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;}}
+.scan-track{height:2px; width:220px; background:var(--border-soft); border-radius:2px; overflow:hidden; position:relative;}
+.scan-track::after{content:''; position:absolute; top:0; left:-30%; width:30%; height:100%; background:linear-gradient(90deg, transparent, var(--accent), transparent); animation:scan-move 1.1s ease-in-out infinite;}
+@keyframes scan-move{0%{left:-30%;} 100%{left:100%;}}
+
+/* ---------- compact action toolbar (copy / listen / feedback / retry) ---------- */
+.action-toolbar{display:flex; align-items:center; gap:2px;}
+.action-toolbar .icon-btn.active-up{color:var(--tier-high); background:var(--tier-high-bg);}
+.action-toolbar .icon-btn.active-down{color:var(--danger); background:var(--danger-bg);}
+.action-toolbar .icon-btn.active-speak{color:var(--accent-strong); background:var(--accent-soft);}
+.action-toolbar .icon-btn.active-speak svg{animation:speak-pulse 1s ease-in-out infinite;}
+@keyframes speak-pulse{0%,100%{opacity:1;} 50%{opacity:.55;}}
+
+/* ---------- response card ---------- */
+.result-block{margin-top:var(--sp-5); display:flex; flex-direction:column; gap:var(--sp-4);}
+.rcard{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-5); animation:card-in .32s var(--ease-settle);}
+@keyframes card-in{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+.rcard-head{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--sp-4); margin-bottom:var(--sp-4);}
+.rcard-title{font-size:1.08rem; font-weight:600; margin:0 0 4px;}
+.rcard-eyebrow{font-family:var(--font-mono); font-size:.68rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:.08em;}
+
+/* stamp — signature element */
+.stamp{
+  font-family:var(--font-mono); font-weight:700; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase;
+  padding:7px 13px; border-radius:5px; border:2px solid var(--tier-c); color:var(--tier-c); background:var(--tier-bg);
+  display:inline-flex; align-items:center; gap:8px; transform:rotate(-2deg); position:relative; white-space:nowrap;
+  box-shadow: inset 0 0 0 2px var(--tier-bg); flex:0 0 auto;
+  animation:stamp-press .38s var(--ease-settle);
+}
+.stamp::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--tier-c); flex:0 0 auto;}
+@keyframes stamp-press{0%{opacity:0; transform:scale(1.5) rotate(-9deg);} 60%{opacity:1;} 100%{opacity:1; transform:scale(1) rotate(-2deg);}}
+.stamp-score{opacity:.75; font-weight:600;}
+.stamp-btn{border:none; background:none; cursor:pointer; padding:0; margin:0;}
+
+.confidence-explain{margin-top:10px; padding:12px 14px; background:var(--surface-2); border:1px solid var(--border-soft); border-radius:var(--r-sm); font-size:.78rem; color:var(--text-dim); animation:card-in .2s ease;}
+.confidence-explain ul{margin:6px 0 0; padding-left:18px;}
+.confidence-explain li{margin-bottom:3px;}
+
+.excerpt{
+  font-family:var(--font-serif); font-size:1.02rem; line-height:1.65; color:var(--text);
+  border-left:2px solid var(--border); padding:2px 0 2px 18px; margin:0 0 var(--sp-4); font-style:italic;
+}
+.rcard.tier-low .excerpt{color:var(--text-dim);}
+
+.rcard-section{margin-bottom:var(--sp-4);}
+.rcard-section-title{font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text-faint); margin:0 0 8px;}
+.doc-checklist{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px;}
+.doc-checklist li{display:flex; align-items:flex-start; gap:9px; font-size:.85rem; color:var(--text-dim);}
+.doc-checklist svg{margin-top:2px; flex:0 0 auto; color:var(--text-faint);}
+.steps-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; counter-reset:step;}
+.steps-list li{display:flex; gap:10px; font-size:.85rem; color:var(--text-dim); counter-increment:step;}
+.steps-list li::before{content:counter(step); font-family:var(--font-mono); font-size:.72rem; font-weight:700; color:var(--accent-strong); background:var(--accent-soft); width:19px; height:19px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex:0 0 auto; margin-top:1px;}
+
+.citation{display:inline-flex; align-items:center; gap:7px; font-family:var(--font-mono); font-size:.76rem; color:var(--accent-strong); background:var(--accent-soft); padding:7px 11px; border-radius:var(--r-sm); border:1px solid transparent; cursor:pointer; transition:all .15s ease;}
+.citation:hover{border-color:var(--accent);}
+
+.related-row{display:flex; flex-wrap:wrap; gap:7px;}
+.related-chip{font-size:.78rem; color:var(--text-faint); background:transparent; border:1px solid var(--border-soft); padding:6px 11px; border-radius:var(--r-pill); cursor:pointer; transition:all .15s ease;}
+.related-chip:hover{color:var(--text); border-color:var(--text-faint);}
+
+.rcard-footer{display:flex; align-items:center; justify-content:space-between; padding-top:var(--sp-4); margin-top:var(--sp-1); border-top:1px solid var(--border-soft);}
+.feedback-row{display:flex; align-items:center; gap:4px;}
+.fb-btn{width:32px; height:32px; border-radius:50%; border:1px solid transparent; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-faint); transition:all .15s ease;}
+.fb-btn:hover{background:var(--surface-2); color:var(--text);}
+.fb-btn.active-up{color:var(--tier-high); background:var(--tier-high-bg);}
+.fb-btn.active-down{color:var(--danger); background:var(--danger-bg);}
+.fb-ack{font-size:.75rem; color:var(--text-faint); margin-left:6px; animation:fade-in-out 2.4s ease forwards;}
+@keyframes fade-in-out{0%{opacity:0;} 15%{opacity:1;} 80%{opacity:1;} 100%{opacity:0;}}
+.fb-reason-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
+.fb-reason-chip{font-size:.72rem; padding:5px 10px; border-radius:var(--r-pill); border:1px solid var(--border); background:var(--surface-2); cursor:pointer; color:var(--text-dim);}
+.fb-reason-chip:hover{border-color:var(--text-faint); color:var(--text);}
+
+.listen-btn{display:inline-flex; align-items:center; gap:8px; font-size:.8rem; font-weight:600; color:var(--text-dim); background:var(--surface-2); border:1px solid var(--border); padding:7px 13px; border-radius:var(--r-pill); cursor:pointer; transition:all .15s ease;}
+.listen-btn:hover{border-color:var(--accent);}
+.listen-btn.playing{color:var(--accent-strong); border-color:var(--accent); background:var(--accent-soft);}
+.listen-progress{width:52px; height:3px; background:var(--border); border-radius:2px; overflow:hidden;}
+.listen-progress > div{height:100%; background:var(--accent); transition:width .2s linear;}
+
+/* compact secondary result */
+.other-matches-label{font-family:var(--font-mono); font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin:var(--sp-2) 0 0;}
+.compact-card{display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--r-md); padding:12px 16px;}
+.compact-card .ctitle{font-size:.86rem; font-weight:600;}
+.compact-card .cexcerpt{font-size:.78rem; color:var(--text-faint); margin-top:2px; max-width:52ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+/* no-match / error states */
+.state-card{border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-6); text-align:center; animation:card-in .3s var(--ease-settle);}
+.state-card.no-match{background:var(--surface); border-color:var(--border);}
+.state-card.error{background:var(--danger-bg); border-color:rgba(214,104,94,.3);}
+.state-icon{width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto var(--sp-4);}
+.state-card.no-match .state-icon{background:var(--tier-none-bg); color:var(--tier-none);}
+.state-card.error .state-icon{background:var(--danger-bg); color:var(--danger);}
+.state-card h3{margin:0 0 8px; font-size:1.02rem;}
+.state-card p{margin:0 0 var(--sp-4); color:var(--text-dim); font-size:.85rem; max-width:44ch; margin-left:auto; margin-right:auto;}
+.state-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+
+/* now playing bar */
+.now-playing{position:fixed; left:var(--sidebar-w); right:0; bottom:0; z-index:20; background:var(--bg-elevated); border-top:1px solid var(--border); padding:11px var(--sp-6); display:flex; align-items:center; gap:var(--sp-4); animation:slide-up .25s var(--ease-settle);}
+@keyframes slide-up{from{transform:translateY(100%);} to{transform:translateY(0);}}
+.now-playing .np-title{font-size:.8rem; font-weight:600; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.np-eyebrow{font-family:var(--font-mono); font-size:.65rem; color:var(--text-faint); text-transform:uppercase; letter-spacing:.07em;}
+
+/* ---------- tables (admin, dense) ---------- */
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden;}
+.panel-head{display:flex; align-items:center; justify-content:space-between; padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border-soft); gap:var(--sp-4); flex-wrap:wrap;}
+.panel-head h2{margin:0; font-size:1rem;}
+.panel-head .sub{font-size:.78rem; color:var(--text-faint); margin-top:2px;}
+.filter-bar{display:flex; gap:8px; flex-wrap:wrap; padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border-soft); background:var(--surface-2);}
+.filter-bar input,.filter-bar select{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); padding:7px 10px; font-size:.78rem; color:var(--text);}
+.data-table{width:100%; border-collapse:collapse; font-size:.8rem;}
+.data-table th{text-align:left; font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); padding:10px 20px; border-bottom:1px solid var(--border-soft); font-weight:600; white-space:nowrap;}
+.data-table td{padding:11px 20px; border-bottom:1px solid var(--border-soft); color:var(--text-dim); vertical-align:top;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr.clickable{cursor:pointer;}
+.data-table tr.clickable:hover td{background:var(--surface-2);}
+.data-table .mono-cell{font-family:var(--font-mono); font-size:.76rem;}
+.row-detail{background:var(--surface-2);}
+.row-detail td{padding:16px 20px;}
+.empty-row{padding:var(--sp-7) var(--sp-5); text-align:center; color:var(--text-faint);}
+.empty-row .big-icon{color:var(--tier-high); margin-bottom:10px;}
+
+/* ---------- upload / dropzone ---------- */
+.dropzone{border:1.5px dashed var(--border); border-radius:var(--r-lg); padding:var(--sp-7) var(--sp-5); text-align:center; transition:all .15s ease; cursor:pointer;}
+.dropzone.dragover{border-color:var(--accent); background:var(--accent-soft);}
+.dropzone svg{color:var(--text-faint); margin-bottom:var(--sp-3);}
+.dropzone h3{margin:0 0 4px; font-size:.9rem;}
+.dropzone p{margin:0; color:var(--text-faint); font-size:.78rem;}
+.file-row{display:flex; align-items:center; gap:var(--sp-3); padding:12px 16px; border:1px solid var(--border-soft); border-radius:var(--r-md); margin-top:8px;}
+.file-row .fname{font-size:.82rem; font-weight:600;}
+.file-row .fmeta{font-size:.72rem; color:var(--text-faint); margin-top:2px;}
+.file-progress{height:4px; background:var(--border-soft); border-radius:2px; overflow:hidden; margin-top:6px;}
+.file-progress > div{height:100%; background:var(--accent); transition:width .25s ease;}
+.reject-msg{color:var(--danger); font-size:.78rem; display:flex; gap:7px; align-items:center; margin-top:8px;}
+
+/* ---------- charts ---------- */
+.stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:var(--sp-4); margin-bottom:var(--sp-5);}
+.stat-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); padding:var(--sp-4);}
+.stat-card .num{font-family:var(--font-mono); font-size:1.5rem; font-weight:700;}
+.stat-card .lbl{font-size:.74rem; color:var(--text-faint); margin-top:4px;}
+.chart-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:var(--sp-5); margin-bottom:var(--sp-4);}
+.chart-card h3{margin:0 0 var(--sp-4); font-size:.86rem;}
+.bar-row{display:flex; align-items:center; gap:10px; margin-bottom:9px;}
+.bar-row .blabel{width:150px; flex:0 0 auto; font-size:.75rem; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.bar-track{flex:1 1 auto; height:8px; background:var(--border-soft); border-radius:4px; overflow:hidden;}
+.bar-fill{height:100%; border-radius:4px; background:var(--accent);}
+.bar-val{width:34px; flex:0 0 auto; font-family:var(--font-mono); font-size:.72rem; color:var(--text-faint); text-align:right;}
+
+/* ---------- modal ---------- */
+.modal-overlay{position:fixed; inset:0; background:rgba(10,10,13,.65); backdrop-filter:blur(2px); z-index:50; display:flex; align-items:center; justify-content:center; padding:var(--sp-4); animation:fade-in .15s ease;}
+@keyframes fade-in{from{opacity:0;} to{opacity:1;}}
+.modal{background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--r-lg); width:100%; max-width:520px; max-height:86vh; overflow-y:auto; box-shadow:var(--shadow-lg); animation:modal-in .22s var(--ease-settle);}
+@keyframes modal-in{from{opacity:0; transform:scale(.97) translateY(6px);} to{opacity:1; transform:none;}}
+.modal-head{display:flex; align-items:flex-start; justify-content:space-between; padding:var(--sp-5) var(--sp-5) var(--sp-4); border-bottom:1px solid var(--border-soft);}
+.modal-head h2{margin:0; font-size:1.02rem;}
+.modal-body{padding:var(--sp-5);}
+.modal-foot{display:flex; justify-content:flex-end; gap:10px; padding:var(--sp-4) var(--sp-5); border-top:1px solid var(--border-soft);}
+
+/* ---------- demo controls ---------- */
+.demo-fab{position:fixed; right:var(--sp-5); bottom:var(--sp-5); z-index:30; width:42px; height:42px; border-radius:50%; background:var(--surface-3); border:1px solid var(--border); color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:var(--shadow-md);}
+.demo-panel{position:fixed; right:var(--sp-5); bottom:74px; z-index:30; width:240px; background:var(--bg-elevated); border:1px solid var(--border); border-radius:var(--r-md); box-shadow:var(--shadow-lg); padding:var(--sp-4); animation:card-in .18s ease;}
+.demo-panel h4{margin:0 0 3px; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); font-family:var(--font-mono);}
+.demo-panel .hint{font-size:.7rem; color:var(--text-faint); margin-bottom:10px;}
+.demo-row{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:12px;}
+.demo-btn{font-size:.7rem; padding:5px 8px; border-radius:5px; border:1px solid var(--border); background:var(--surface-2); cursor:pointer; color:var(--text-dim);}
+.demo-btn.on{border-color:var(--accent); color:var(--accent-strong); background:var(--accent-soft);}
+.demo-toggle-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:.76rem; color:var(--text-dim);}
+
+/* ---------- toast ---------- */
+.toast-wrap{position:fixed; top:var(--sp-5); right:var(--sp-5); z-index:60; display:flex; flex-direction:column; gap:8px;}
+.toast{background:var(--surface-3); border:1px solid var(--border); padding:11px 16px; border-radius:var(--r-sm); font-size:.8rem; box-shadow:var(--shadow-md); animation:toast-in .25s var(--ease-settle);}
+@keyframes toast-in{from{opacity:0; transform:translateX(12px);} to{opacity:1; transform:none;}}
+
+/* ---------- settings ---------- */
+.settings-row{display:flex; align-items:center; justify-content:space-between; padding:var(--sp-4) 0; border-bottom:1px solid var(--border-soft);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row .st{font-size:.86rem; font-weight:600;}
+.settings-row .sd{font-size:.76rem; color:var(--text-faint); margin-top:2px; max-width:46ch;}
+
+.page-head{margin-bottom:var(--sp-5);}
+.page-head h1{font-size:1.3rem; margin:0 0 4px;}
+.page-head p{margin:0; color:var(--text-faint); font-size:.85rem;}
+
+@media (max-width:900px){
+  .sidebar{width:64px;}
+  .brand-name,.brand-sub,.nav-group-label,.nav-item span.label,.role-meta{display:none;}
+  .nav-item{justify-content:center;}
+  .role-chip{justify-content:center;}
+  .now-playing{left:64px;}
+  .view-root{padding:var(--sp-4);}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* =========================================================================
+   LEDGER — front-end prototype
+   Single-file demo implementing the Feature & UX Specification.
+   No backend: search results, ingestion, audit/analytics data are mocked
+   so every state in the spec can be reached and reviewed. Voice OUTPUT
+   uses the real browser speechSynthesis API (reads the excerpt verbatim).
+   Voice INPUT uses the real Web Speech API when the browser supports it,
+   and falls back to a simulated (clearly-labeled) demo flow otherwise.
+   ========================================================================= */
+
+/* ---------------- icon set (inline SVG, line-style, currentColor) ---------------- */
+const ICON = {
+  search:`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>`,
+  mic:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4M8 22h8"/></svg>`,
+  micOff:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M9 9v3a3 3 0 0 0 4.6 2.5M15 6.5V5a3 3 0 0 0-5.7-1.3"/><path d="M5 10v1a7 7 0 0 0 10.5 6M19 11v0"/><path d="M12 18v4M8 22h8"/></svg>`,
+  x:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
+  check:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+  checkCircle:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.3 2.3L16 9.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  alert:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4M12 17.5v.1"/></svg>`,
+  info:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v.1M12 11v5" stroke-linecap="round"/></svg>`,
+  thumbUp:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zm0 0l4.5-8a2 2 0 0 1 3.8.9L14 8h5a2 2 0 0 1 2 2.3l-1.3 8A2 2 0 0 1 17.8 20H10a3 3 0 0 1-3-3"/></svg>`,
+  thumbDown:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M17 13V4h3a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-3zm0 0l-4.5 8a2 2 0 0 1-3.8-.9L10 16H5a2 2 0 0 1-2-2.3l1.3-8A2 2 0 0 1 6.2 4H14a3 3 0 0 1 3 3"/></svg>`,
+  play:`<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l15 8-15 8V4z"/></svg>`,
+  pause:`<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="5" height="16" rx="1"/><rect x="14" y="4" width="5" height="16" rx="1"/></svg>`,
+  stop:`<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>`,
+  doc:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/></svg>`,
+  upload:`<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>`,
+  flag:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h13l-3 4.5L18 13H5"/></svg>`,
+  chart:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>`,
+  log:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h9"/></svg>`,
+  users:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 4.5a3.2 3.2 0 0 1 0 6.4M17.5 14a5 5 0 0 1 3.5 6"/></svg>`,
+  settings:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1z"/></svg>`,
+  logout:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4M16 17l5-5-5-5M21 12H9"/></svg>`,
+  chevron:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>`,
+  external:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4L10 14M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>`,
+  download:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M4 19h16"/></svg>`,
+  filter:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M7 12h10M10 19h4"/></svg>`,
+  gear:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.4 1z"/></svg>`,
+  archive:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 13h4"/></svg>`,
+  refresh:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg>`,
+  plus:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  copy:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>`,
+  speaker:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 9a4.5 4.5 0 0 1 0 6M19 7a8 8 0 0 1 0 10"/></svg>`,
+  sparkle:`<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c.4 3.6 1.3 6 3 7.7 1.7 1.7 4.1 2.6 7 3-3.6.4-6 1.3-7.7 3-1.7 1.7-2.6 4.1-3 7-.4-3.6-1.3-6-3-7.7C6.6 13.3 4.2 12.4 1 12c3.6-.4 6-1.3 7.7-3C10.4 7.3 11.3 4.9 12 2z"/></svg>`,
+};
+function icon(name){ return ICON[name] || ''; }
+
+/* ---------------- mock data ---------------- */
+const ROLES = {
+  loan_officer:{label:'Loan Officer', short:'LO', desc:'Search & ask questions, give feedback'},
+  underwriter:{label:'Underwriter', short:'UW', desc:'Search plus department-restricted content'},
+  compliance_admin:{label:'Compliance / Admin', short:'CA', desc:'Full access — upload, analytics, audit log'},
+};
+
+const DOCS = [
+  {id:'d1', name:'HUD Handbook 4000.1', dept:'FHA', type:'Handbook', version:'2025.2', status:'active', requiresApproval:true, updated:'2026-05-14'},
+  {id:'d2', name:'Fannie Mae Selling Guide', dept:'Conventional', type:'Guide', version:'2026.1', status:'active', requiresApproval:true, updated:'2026-06-02'},
+  {id:'d3', name:'PMI Cancellation Policy — Internal', dept:'Servicing', type:'Policy', version:'v3', status:'active', requiresApproval:false, updated:'2026-04-20'},
+  {id:'d4', name:'VA Loan Guaranty Manual', dept:'VA', type:'Manual', version:'2024.4', status:'pending_processing', requiresApproval:true, updated:'2026-07-16'},
+  {id:'d5', name:'Appraisal Standards 2026', dept:'Appraisal', type:'Standard', version:'2026', status:'processing', requiresApproval:true, updated:'2026-07-17'},
+  {id:'d6', name:'State Disclosure Requirements — CA', dept:'Compliance', type:'Regulation', version:'v7', status:'active', requiresApproval:true, updated:'2026-03-11'},
+  {id:'d7', name:'Underwriting Overlay Matrix', dept:'Underwriting', type:'Internal', version:'v12', status:'failed', requiresApproval:false, updated:'2026-07-15', failReason:'OCR could not parse 4 scanned pages (low scan quality).'},
+  {id:'d8', name:'Flood Zone Determination SOP', dept:'Compliance', type:'SOP', version:'v2', status:'active', requiresApproval:false, updated:'2026-02-27'},
+];
+
+const USERS = [
+  {id:'u1', name:'Priya Nandakumar', email:'priya.n@ledgerhq.com', role:'loan_officer', dept:'Retail Lending'},
+  {id:'u2', name:'Marcus Webb', email:'marcus.w@ledgerhq.com', role:'loan_officer', dept:'Retail Lending'},
+  {id:'u3', name:'Diane Okafor', email:'diane.o@ledgerhq.com', role:'underwriter', dept:'Underwriting'},
+  {id:'u4', name:'Sam Reyes', email:'sam.r@ledgerhq.com', role:'underwriter', dept:'Underwriting'},
+  {id:'u5', name:'Helen Zhu', email:'helen.z@ledgerhq.com', role:'compliance_admin', dept:'Compliance'},
+];
+
+let GAPS = [
+  {id:'g1', query:'Does Ledger support jumbo loan overlays in Alaska?', ts:'2026-07-17T14:20:00', freq:6, role:'loan_officer', dept:'Retail Lending', resolved:false},
+  {id:'g2', query:'Can a co-signer live outside the property state for a USDA loan?', ts:'2026-07-16T09:05:00', freq:4, role:'underwriter', dept:'Underwriting', resolved:false},
+  {id:'g3', query:'What is the seasoning requirement for a cash-out refi after a rate-and-term refi?', ts:'2026-07-15T11:40:00', freq:3, role:'underwriter', dept:'Underwriting', resolved:false},
+  {id:'g4', query:'Are gift funds allowed for the full down payment on a second home?', ts:'2026-07-14T16:12:00', freq:2, role:'loan_officer', dept:'Retail Lending', resolved:true},
+  {id:'g5', query:'How is DTI calculated when a borrower has 1099 income under 2 years?', ts:'2026-07-12T08:50:00', freq:5, role:'loan_officer', dept:'Retail Lending', resolved:false},
+  {id:'g6', query:'Does the overlay matrix apply to manufactured homes on leased land?', ts:'2026-07-10T13:33:00', freq:1, role:'underwriter', dept:'Underwriting', resolved:true},
+];
+
+const AUDIT = [
+  {id:'a1', user:'Priya Nandakumar', role:'loan_officer', query:'Minimum credit score for FHA loan', ts:'2026-07-18T09:12:00', confidence:94, tier:'high', docs:['HUD Handbook 4000.1'], rid:'RSP-88213'},
+  {id:'a2', user:'Marcus Webb', role:'loan_officer', query:'Can PMI be removed before 78% LTV', ts:'2026-07-18T08:47:00', confidence:82, tier:'medium', docs:['PMI Cancellation Policy — Internal'], rid:'RSP-88209'},
+  {id:'a3', user:'Diane Okafor', role:'underwriter', query:'Self-employed borrower income documentation', ts:'2026-07-17T17:03:00', confidence:63, tier:'low', docs:['Fannie Mae Selling Guide'], rid:'RSP-88190'},
+  {id:'a4', user:'Sam Reyes', role:'underwriter', query:'Jumbo loan overlays in Alaska', ts:'2026-07-17T14:20:00', confidence:31, tier:'none', docs:[], rid:'RSP-88184'},
+  {id:'a5', user:'Priya Nandakumar', role:'loan_officer', query:'VA funding fee exemption disability', ts:'2026-07-17T11:15:00', confidence:91, tier:'high', docs:['VA Loan Guaranty Manual'], rid:'RSP-88170'},
+  {id:'a6', user:'Helen Zhu', role:'compliance_admin', query:'CA disclosure timeline for adjustable rate loans', ts:'2026-07-16T15:40:00', confidence:88, tier:'medium', docs:['State Disclosure Requirements — CA'], rid:'RSP-88151'},
+  {id:'a7', user:'Marcus Webb', role:'loan_officer', query:'Flood zone determination appeal process', ts:'2026-07-16T10:22:00', confidence:77, tier:'medium', docs:['Flood Zone Determination SOP'], rid:'RSP-88140'},
+  {id:'a8', user:'Diane Okafor', role:'underwriter', query:'DTI with 1099 income under 2 years', ts:'2026-07-15T09:58:00', confidence:48, tier:'none', docs:[], rid:'RSP-88109'},
+  {id:'a9', user:'Sam Reyes', role:'underwriter', query:'Appraisal transfer between lenders', ts:'2026-07-14T13:26:00', confidence:85, tier:'medium', docs:['Appraisal Standards 2026'], rid:'RSP-88088'},
+  {id:'a10', user:'Priya Nandakumar', role:'loan_officer', query:'FHA gift fund documentation requirements', ts:'2026-07-14T09:03:00', confidence:96, tier:'high', docs:['HUD Handbook 4000.1'], rid:'RSP-88071'},
+];
+
+/* canned Response Packages keyed by a short id; matched via keyword lookup */
+const PACKAGES = {
+  fha_credit:{
+    id:'fha_credit', tier:'high', score:94,
+    title:'Minimum credit score for an FHA loan',
+    excerpt:'Borrowers with a decision credit score at or above 580 are eligible for maximum financing (96.5% LTV). Borrowers with scores between 500 and 579 are limited to 90% LTV. Loans for borrowers below 500 are not eligible for FHA insurance.',
+    source:{doc:'HUD Handbook 4000.1', section:'II.A.1.b — Credit Score Requirements', page:'142', version:'2025.2', updated:'2026-05-14'},
+    docsNeeded:['Tri-merge credit report','Letter of explanation for any derogatory items','Most recent 2 years of credit history'],
+    steps:['Pull tri-merge credit report','Confirm decision score against the 580 / 500 thresholds','Apply the matching LTV cap to the loan estimate','Flag any score under 500 as ineligible'],
+    related:['What LTV applies to a 620 credit score FHA loan?','How are derogatory credit items documented?','Are manual underwrites allowed under 580?'],
+  },
+  pmi_removal:{
+    id:'pmi_removal', tier:'medium', score:82,
+    title:'PMI removal before 78% LTV',
+    excerpt:'A borrower may request PMI cancellation once the loan balance reaches 80% of the original value, provided the loan is current and no second lien exists. Automatic termination still occurs at 78% regardless of request.',
+    source:{doc:'PMI Cancellation Policy — Internal', section:'3.2 — Borrower-Requested Cancellation', page:'6', version:'v3', updated:'2026-04-20'},
+    docsNeeded:['Current payment history (12 months)','Written cancellation request','Property value confirmation (BPO or appraisal, lender discretion)'],
+    steps:['Confirm loan is current with no 30-day lates in past 12 months','Verify no subordinate liens exist','Order value confirmation if requested before 80%','Submit for servicing review'],
+    related:['What counts as "current" for PMI cancellation?','Does a second lien block cancellation entirely?','Is a new appraisal required or is a BPO sufficient?'],
+  },
+  self_employed:{
+    id:'self_employed', tier:'low', score:63,
+    title:'Self-employed borrower income documentation',
+    excerpt:'Two years of personal and business tax returns are generally required, along with a year-to-date profit and loss statement; additional documentation may be required based on business structure and income stability.',
+    source:{doc:'Fannie Mae Selling Guide', section:'B3-3.2 — Self-Employment Income (general)', page:'—', version:'2026.1', updated:'2026-06-02'},
+    docsNeeded:['2 years personal tax returns','2 years business tax returns (if applicable)','YTD profit & loss statement','Business license or CPA letter (if requested)'],
+    steps:['Confirm business structure (sole prop, S-corp, partnership)','Pull 2-year returns and YTD P&L','Assess income trend and stability','Escalate to underwriter if income is declining or newly established'],
+    related:['How is income averaged with a declining trend?','What if the business is under 2 years old?','Is a CPA letter required for every self-employed borrower?'],
+  },
+};
+
+/* ---------------- state ---------------- */
+const state = {
+  authed:false, role:null, userName:'',
+  view:'search',
+  results:null,        // {mode:'result', pkg, others:[...]} | {mode:'no_match', query} | {mode:'error', query} | null
+  loading:false,
+  loadingPhraseIndex:0,
+  lastQuery:'',
+  voice:{status:'idle', supportsReal:false, pushToTalk:false},
+  tts:{activeId:null, status:'idle', progress:0, readStepsToo:false, label:''},
+  feedback:{},          // pkgInstanceId -> 'up' | 'down'
+  feedbackReasonOpenFor:null,
+  expandedConfidence:null,
+  docs: JSON.parse(JSON.stringify(DOCS)),
+  uploadFiles:[],        // in-flight upload rows for the modal
+  gaps: JSON.parse(JSON.stringify(GAPS)),
+  gapFilter:{sort:'freq', dept:'all', showResolved:false},
+  audit: JSON.parse(JSON.stringify(AUDIT)),
+  auditFilter:{user:'all', q:'', minConf:0},
+  auditExpandedRow:null,
+  users: JSON.parse(JSON.stringify(USERS)),
+  demoOpen:false,
+  demoForce:null,        // null | 'high' | 'medium' | 'low' | 'none' | 'error'
+  voiceDemoForce:null,   // null | 'no_speech' | 'low_confidence' | 'denied'
+  ackFor:null,          // {id, text} — generic brief inline acknowledgment (feedback, copy, etc.)
+  analyticsEmpty:false,
+  gapsEmptyDemo:false,
+  modal:null,            // {type:'source', pkg} | {type:'sessionExpired'} | {type:'docDetail', id} | {type:'addUser'}
+  sessionPreservedQuery:'',
+  docDetailId:null,
+  toasts:[],
+  loginError:false,
+  loginSelectedRole:'loan_officer',
+};
+
+let ttsWatcher = null;
+let recognition = null;
+let listenTimeout = null;
+
+/* ---------------- small helpers ---------------- */
+function el(){ return document.getElementById('app'); }
+function fmtDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'}) + ' · ' + d.toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'});
+}
+function tierMeta(tier){
+  return {
+    high:{label:'Verified', c:'var(--tier-high)', bg:'var(--tier-high-bg)'},
+    medium:{label:'Verify source', c:'var(--tier-medium)', bg:'var(--tier-medium-bg)'},
+    low:{label:'Low confidence', c:'var(--tier-low)', bg:'var(--tier-low-bg)'},
+    none:{label:'No confident match', c:'var(--tier-none)', bg:'var(--tier-none-bg)'},
+  }[tier];
+}
+function toast(msg){
+  const id = 't'+Date.now()+Math.random();
+  state.toasts.push({id, msg});
+  update();
+  setTimeout(()=>{ state.toasts = state.toasts.filter(t=>t.id!==id); update(); }, 2600);
+}
+function showAck(id, text){
+  state.ackFor = {id, text};
+  update();
+  setTimeout(()=>{ if(state.ackFor && state.ackFor.id===id && state.ackFor.text===text){ state.ackFor=null; update(); } }, 2200);
+}
+function withFocusPreserved(fn){
+  const active = document.activeElement;
+  const id = active && active.id;
+  const tag = active && active.tagName;
+  const canSelect = tag === 'INPUT' || tag === 'TEXTAREA';
+  const selStart = canSelect ? active.selectionStart : null;
+  const selEnd = canSelect ? active.selectionEnd : null;
+  const scrollY = window.scrollY;
+  fn();
+  if(id){
+    const revived = document.getElementById(id);
+    if(revived){
+      revived.focus({preventScroll:true});
+      if(canSelect && selStart!=null){
+        try{ revived.setSelectionRange(selStart, selEnd); }catch(e){}
+      }
+    }
+  }
+  window.scrollTo(0, scrollY);
+}
+function update(){ withFocusPreserved(fullRender); }
+
+/* ---------------- top-level render ---------------- */
+function fullRender(){
+  if(!state.authed){ el().innerHTML = renderLogin(); return; }
+  el().innerHTML = renderShell();
+}
+
+function renderLogin(){
+  const roleEntries = Object.entries(ROLES);
+  return `
+  <div class="login-shell">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-mark">${icon('doc')}</div>
+        <h1>Sign in to Ledger</h1>
+        <p>Retrieval-only mortgage knowledge assistant</p>
+      </div>
+      ${state.loginError ? `<div class="login-error">${icon('alert')}<div>That email and password combination wasn't found. Check your credentials and try again.</div></div>` : ''}
+      <div data-action="noop">
+        <div class="field">
+          <label class="field-label" for="login-email">Work email</label>
+          <input class="text-input" id="login-email" type="text" placeholder="you@ledgerhq.com" value="priya.n@ledgerhq.com">
+        </div>
+        <div class="field">
+          <label class="field-label" for="login-pass">Password</label>
+          <input class="text-input" id="login-pass" type="password" placeholder="••••••••" value="demo-password">
+        </div>
+        <div class="field">
+          <label class="field-label">Preview as role <span style="text-transform:none;font-weight:400;color:var(--text-faint)">(demo only — real sign-in resolves this automatically)</span></label>
+          <div class="role-picker">
+            ${roleEntries.map(([key,r])=>`
+              <div class="role-option ${state.loginSelectedRole===key?'selected':''}" data-action="select-role" data-role="${key}">
+                <div>
+                  <div class="rname">${r.label}</div>
+                  <div class="rdesc">${r.desc}</div>
+                </div>
+                ${state.loginSelectedRole===key ? `<span style="color:var(--accent-strong)">${icon('checkCircle')}</span>` : ''}
+              </div>`).join('')}
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%; justify-content:center; padding:11px;" type="button" data-action="login-submit">Sign in</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- app shell (sidebar + topbar + view) ---------------- */
+const NAV = {
+  loan_officer:[{v:'search', label:'Search', icon:'search'}],
+  underwriter:[{v:'search', label:'Search', icon:'search'}],
+  compliance_admin:[
+    {v:'search', label:'Search', icon:'search'},
+    {group:'Admin'},
+    {v:'docs', label:'Document Library', icon:'doc'},
+    {v:'gaps', label:'Knowledge Gaps', icon:'flag'},
+    {v:'analytics', label:'Analytics', icon:'chart'},
+    {v:'audit', label:'Audit Log', icon:'log'},
+    {v:'users', label:'User & Role Management', icon:'users'},
+  ],
+};
+
+function pageTitle(){
+  return {
+    search:'Search', docs:'Document Library', gaps:'Knowledge Gap Review',
+    analytics:'Analytics Dashboard', audit:'Audit Log', users:'User & Role Management',
+    settings:'Account & Settings',
+  }[state.view] || '';
+}
+
+function renderShell(){
+  const navItems = NAV[state.role] || NAV.loan_officer;
+  const role = ROLES[state.role];
+  const initials = state.userName.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
+  return `
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">${icon('doc')}</div>
+        <div>
+          <div class="brand-name">Ledger</div>
+          <div class="brand-sub">Knowledge Assistant</div>
+        </div>
+      </div>
+      <nav class="nav">
+        ${navItems.map(item=> item.group
+          ? `<div class="nav-group-label">${item.group}</div>`
+          : `<button class="nav-item ${state.view===item.v?'active':''}" data-action="nav" data-view="${item.v}">${icon(item.icon)}<span class="label">${item.label}</span></button>`
+        ).join('')}
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" data-action="nav" data-view="settings">${icon('settings')}<span class="label">Settings</span></button>
+        <button class="nav-item" data-action="logout">${icon('logout')}<span class="label">Log out</span></button>
+        <div class="role-chip">
+          <div class="role-avatar">${initials}</div>
+          <div class="role-meta">
+            <div class="name">${state.userName}</div>
+            <div class="role">${role.label}</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <div class="topbar-crumb">Ledger / ${role.label}</div>
+          <div class="topbar-title">${pageTitle()}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="badge badge-neutral"><span class="badge-dot"></span>Retrieval only — no generated answers</span>
+        </div>
+      </div>
+      <div class="view-root ${state.view==='search'?'narrow':''}">
+        ${renderView()}
+      </div>
+    </div>
+  </div>
+  ${renderNowPlaying()}
+  ${renderDemoControls()}
+  ${renderModal()}
+  <div class="toast-wrap">${state.toasts.map(t=>`<div class="toast">${t.msg}</div>`).join('')}</div>
+  `;
+}
+
+function renderView(){
+  switch(state.view){
+    case 'search': return renderSearchView();
+    case 'docs': return renderDocsView();
+    case 'gaps': return renderGapsView();
+    case 'analytics': return renderAnalyticsView();
+    case 'audit': return renderAuditView();
+    case 'users': return renderUsersView();
+    case 'settings': return renderSettingsView();
+    default: return '';
+  }
+}
+
+/* ---------------- SEARCH VIEW ---------------- */
+const EXAMPLE_QUESTIONS = [
+  'Minimum credit score for an FHA loan',
+  'Can PMI be removed before 78% LTV?',
+  'Self-employed borrower income documentation',
+  'VA funding fee exemption for disability',
+];
+
+/* Loading-state phrasing — deliberately retrieval-flavored, never "thinking"
+   or "composing", per the product's non-negotiable no-generation principle. */
+const RETRIEVAL_PHRASES = [
+  'Searching the index',
+  'Matching passages',
+  'Checking source freshness',
+  'Verifying citation',
+];
+let loadingPhraseTimer = null;
+
+function renderSearchView(){
+  const showEmpty = !state.results && !state.loading;
+  return `
+    <div class="search-bar-wrap">
+      ${state.results || state.loading ? '' : `
+        <div class="search-hero">
+          <h1>What do you need to verify?</h1>
+          <p>Ask in plain language. Ledger retrieves and cites — it never writes a new answer.</p>
+        </div>`}
+      <div class="search-bar" data-action="noop">
+        ${icon('search')}
+        <input id="search-input" type="text" placeholder="e.g. What documents are needed for a VA loan appraisal?" value="${escapeAttr(state.lastQuery)}" autocomplete="off">
+        ${renderMicButton()}
+        <button class="search-submit" type="button" data-action="search-submit" aria-label="Search">${icon('chevron')}</button>
+      </div>
+      ${renderVoiceStatusRow()}
+    </div>
+
+    ${showEmpty ? `
+      <div class="chip-grid">
+        ${EXAMPLE_QUESTIONS.map(q=>`<button type="button" class="chip" data-action="run-example" data-q="${escapeAttr(q)}">${q}</button>`).join('')}
+      </div>
+    ` : ''}
+
+    ${state.loading ? `
+      <div class="scan-loader">
+        <div class="retrieval-pill">
+          <span class="spark">${icon('sparkle')}</span>
+          <span class="phrase" id="retrieval-phrase">${RETRIEVAL_PHRASES[state.loadingPhraseIndex % RETRIEVAL_PHRASES.length]}</span>
+        </div>
+        <div class="scan-track"></div>
+      </div>
+    ` : ''}
+
+    ${state.results ? renderResults() : ''}
+  `;
+}
+
+function renderMicButton(){
+  const st = state.voice.status;
+  const listening = st === 'listening';
+  const denied = st === 'denied';
+  return `
+    <button type="button" class="mic-btn ${listening?'listening':''} ${denied?'denied':''}" data-action="mic-toggle" aria-label="${listening?'Stop recording':'Search by voice'}">
+      <span class="mic-ring"></span><span class="mic-ring r2"></span>
+      ${listening ? `<span class="waveform" id="waveform">${Array.from({length:4}).map((_,i)=>`<span style="height:${6+i*2}px"></span>`).join('')}</span>` : (denied ? icon('micOff') : icon('mic'))}
+    </button>
+  `;
+}
+
+function renderVoiceStatusRow(){
+  const v = state.voice;
+  const map = {
+    idle:'', permission:'Requesting microphone access…',
+    listening:'Listening — speak your question', processing:'Transcribing…',
+    no_speech:"Didn't catch any speech — tap the mic to try again",
+    low_confidence:"Didn't quite catch that clearly — please check the text before searching",
+    denied:'Microphone access denied — you can still type your question below',
+    error:'Voice input had a problem — please type your question',
+  };
+  if(!map[v.status]) return `<div class="voice-status-row"></div>`;
+  const live = v.status==='listening' || v.status==='processing' || v.status==='permission';
+  return `<div class="voice-status-row ${live?'live':''}">
+    <span>${map[v.status]}</span>
+    ${v.status==='listening' ? `<button type="button" class="cancel-link" data-action="mic-cancel">Cancel</button>` : ''}
+  </div>`;
+}
+
+function escapeAttr(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function escapeHtml(s){ return escapeAttr(s); }
+
+/* ---------------- RESULTS / RESPONSE PACKAGE ---------------- */
+function renderResults(){
+  const r = state.results;
+  if(r.mode === 'error'){
+    return `
+    <div class="state-card error">
+      <div class="state-icon">${icon('alert')}</div>
+      <h3>Ledger couldn't reach the retrieval index</h3>
+      <p>Your query "${escapeHtml(r.query)}" wasn't searched — this looks like a connection or timeout issue, not a content problem. Nothing was logged as a knowledge gap.</p>
+      <div class="state-actions">
+        <button class="btn btn-primary" data-action="retry-search">${icon('refresh')} Retry search</button>
+      </div>
+    </div>`;
+  }
+  if(r.mode === 'no_match'){
+    return `
+    <div class="state-card no-match">
+      <div class="state-icon">${icon('info')}</div>
+      <h3>No confident match found</h3>
+      <p>Ledger couldn't find sourced guidance for "${escapeHtml(r.query)}" with enough confidence to show. That's a real answer, not a failure — this question has been logged as a knowledge gap for Compliance to review.</p>
+      <div class="state-actions">
+        <button class="btn" data-action="nav" data-view="search">Rephrase &amp; search again</button>
+        <button class="btn btn-primary" data-action="contact-compliance">Contact Compliance</button>
+      </div>
+    </div>`;
+  }
+  const pkg = r.pkg;
+  return `
+    <div class="result-block">
+      ${renderResponseCard(pkg, {primary:true})}
+      ${r.others && r.others.length ? `
+        <div class="other-matches-label">Other matching documents</div>
+        ${r.others.map(o=>`
+          <div class="compact-card">
+            <div>
+              <div class="ctitle">${o.title}</div>
+              <div class="cexcerpt">${o.excerpt}</div>
+            </div>
+            <button class="btn btn-sm" data-action="promote-other" data-id="${o.id}">View</button>
+          </div>
+        `).join('')}
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderResponseCard(pkg, opts){
+  const tm = tierMeta(pkg.tier);
+  const fb = state.feedback[pkg.id];
+  const isPlaying = state.tts.activeId === pkg.id;
+  const showExplain = state.expandedConfidence === pkg.id;
+  const reasonOpen = state.feedbackReasonOpenFor === pkg.id;
+  return `
+  <article class="rcard tier-${pkg.tier}" style="--tier-c:${tm.c}; --tier-bg:${tm.bg};" data-pkg="${pkg.id}">
+    <div class="rcard-head">
+      <div>
+        <div class="rcard-eyebrow">Matched topic</div>
+        <h2 class="rcard-title">${pkg.title}</h2>
+      </div>
+      <button type="button" class="stamp-btn" data-action="toggle-confidence" data-id="${pkg.id}" title="Why this score?">
+        <span class="stamp">${tm.label} <span class="stamp-score">${pkg.score}/100</span></span>
+      </button>
+    </div>
+
+    ${showExplain ? `
+      <div class="confidence-explain">
+        <strong>Why ${pkg.score}/100?</strong>
+        <ul>
+          <li>Semantic match strength to source passage: ${pkg.score >= 90 ? 'very high' : pkg.score>=75?'high':pkg.score>=50?'moderate':'low'}</li>
+          <li>Source document freshness: updated ${pkg.source.updated}</li>
+          <li>Single clearly-matching passage${pkg.tier==='low' || pkg.tier==='medium' ? ', with some ambiguity in scope' : ''}</li>
+        </ul>
+      </div>
+    ` : ''}
+
+    <blockquote class="excerpt">${pkg.excerpt}</blockquote>
+
+    <div class="rcard-section">
+      <div class="rcard-section-title">Required documents</div>
+      <ul class="doc-checklist">
+        ${pkg.docsNeeded.map(d=>`<li>${icon('check')}<span>${d}</span></li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="rcard-section">
+      <div class="rcard-section-title">Next steps</div>
+      <ol class="steps-list">
+        ${pkg.steps.map(s=>`<li>${s}</li>`).join('')}
+      </ol>
+    </div>
+
+    <div class="rcard-section">
+      <button type="button" class="citation" data-action="view-source" data-id="${pkg.id}">
+        ${icon('doc')} ${pkg.source.doc} — ${pkg.source.section} ${icon('external')}
+      </button>
+    </div>
+
+    <div class="rcard-section">
+      <div class="rcard-section-title">Related questions</div>
+      <div class="related-row">
+        ${pkg.related.map(q=>`<button type="button" class="related-chip" data-action="run-example" data-q="${escapeAttr(q)}">${q}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="rcard-footer">
+      <div class="action-toolbar">
+        <button type="button" class="icon-btn" data-action="copy-excerpt" data-id="${pkg.id}" title="Copy excerpt">${icon('copy')}</button>
+        <button type="button" class="icon-btn ${isPlaying && state.tts.status==='playing' ? 'active-speak' : ''}" data-action="toggle-listen" data-id="${pkg.id}" title="${isPlaying && state.tts.status==='playing' ? 'Pause reading aloud' : (isPlaying && state.tts.status==='buffering' ? 'Preparing audio…' : 'Read excerpt aloud')}">
+          ${isPlaying && state.tts.status==='playing' ? icon('pause') : icon('speaker')}
+        </button>
+        <button type="button" class="icon-btn ${fb==='up'?'active-up':''}" data-action="feedback" data-vote="up" data-id="${pkg.id}" title="Helpful" aria-label="Thumbs up">${icon('thumbUp')}</button>
+        <button type="button" class="icon-btn ${fb==='down'?'active-down':''}" data-action="feedback" data-vote="down" data-id="${pkg.id}" title="Not helpful" aria-label="Thumbs down">${icon('thumbDown')}</button>
+        <button type="button" class="icon-btn" data-action="rerun-search" data-id="${pkg.id}" title="Search again">${icon('refresh')}</button>
+      </div>
+      ${state.ackFor && state.ackFor.id===pkg.id ? `<span class="fb-ack">${state.ackFor.text}</span>` : ''}
+    </div>
+    ${reasonOpen ? `
+      <div class="fb-reason-row">
+        <span style="font-size:.72rem;color:var(--text-faint); width:100%;">What went wrong? (optional)</span>
+        ${['Wrong document','Outdated',"Didn't answer question",'Other'].map(r=>`<button type="button" class="fb-reason-chip" data-action="feedback-reason" data-reason="${r}" data-id="${pkg.id}">${r}</button>`).join('')}
+        <button type="button" class="fb-reason-chip" data-action="feedback-reason-skip" data-id="${pkg.id}">Skip</button>
+      </div>
+    ` : ''}
+  </article>`;
+}
+
+function renderNowPlaying(){
+  if(state.tts.status==='idle' || !state.tts.activeId) return '';
+  const pkg = PACKAGES[state.tts.activeId];
+  if(!pkg) return '';
+  return `
+  <div class="now-playing">
+    <button class="icon-btn" data-action="tts-toggle-pause" style="background:var(--surface-3);">${state.tts.status==='playing'?icon('pause'):icon('play')}</button>
+    <div style="flex:1 1 auto; min-width:0;">
+      <div class="np-eyebrow">${state.tts.status==='buffering' ? 'Preparing audio' : 'Reading aloud'}</div>
+      <div class="np-title">${pkg.title}</div>
+    </div>
+    <div class="listen-progress" style="width:90px;"><div style="width:${state.tts.progress}%"></div></div>
+    <button class="icon-btn" data-action="tts-stop" aria-label="Stop">${icon('stop')}</button>
+  </div>`;
+}
+
+/* ---------------- DOCUMENT LIBRARY ---------------- */
+function statusBadge(status){
+  const map = {
+    active:{cls:'badge-active', label:'Active'},
+    pending_processing:{cls:'badge-pending', label:'Pending processing'},
+    processing:{cls:'badge-pending', label:'Processing'},
+    pending_approval:{cls:'badge-pending', label:'Pending approval'},
+    failed:{cls:'badge-failed', label:'Failed'},
+  }[status] || {cls:'badge-neutral', label:status};
+  return `<span class="badge ${map.cls}"><span class="badge-dot"></span>${map.label}</span>`;
+}
+
+function renderDocsView(){
+  return `
+    <div class="page-head" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div>
+        <h1>Document Library</h1>
+        <p>Source documents available to the retrieval index. Upload starts ingestion — documents aren't searchable until processing finishes.</p>
+      </div>
+      <button class="btn btn-primary" data-action="open-upload">${icon('upload')} Upload document</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>${state.docs.length} documents</h2>
+          <div class="sub">${state.docs.filter(d=>d.status==='active').length} active · ${state.docs.filter(d=>d.status==='processing'||d.status==='pending_processing').length} in progress · ${state.docs.filter(d=>d.status==='failed').length} failed</div>
+        </div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Name</th><th>Department</th><th>Version</th><th>Status</th><th>Updated</th></tr></thead>
+        <tbody>
+          ${state.docs.map(d=>`
+            <tr class="clickable" data-action="open-doc-detail" data-id="${d.id}">
+              <td><div style="display:flex;align-items:center;gap:9px;color:var(--text)">${icon('doc')}${d.name}</div></td>
+              <td>${d.dept}</td>
+              <td class="mono-cell">${d.version}</td>
+              <td>${statusBadge(d.status)}</td>
+              <td class="mono-cell">${d.updated}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderDocDetailModal(id){
+  const d = state.docs.find(x=>x.id===id);
+  if(!d) return '';
+  return `
+  <div class="modal-overlay" data-action="close-modal">
+    <div class="modal" data-action="noop">
+      <div class="modal-head">
+        <div>
+          <div class="topbar-crumb">Document detail</div>
+          <h2>${d.name}</h2>
+        </div>
+        <button class="icon-btn" data-action="close-modal">${icon('x')}</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom:16px;">${statusBadge(d.status)}</div>
+        ${d.status==='failed' ? `<div class="reject-msg" style="margin-bottom:16px;">${icon('alert')} ${d.failReason}</div>` : ''}
+        <div class="field"><label class="field-label">Department</label><div>${d.dept}</div></div>
+        <div class="field"><label class="field-label">Document type</label><div>${d.type}</div></div>
+        <div class="field"><label class="field-label">Version</label><div class="mono">${d.version}</div></div>
+        <div class="field"><label class="field-label">Requires compliance approval</label><div>${d.requiresApproval ? 'Yes' : 'No'}</div></div>
+        <div class="field"><label class="field-label">Last updated</label><div class="mono">${d.updated}</div></div>
+      </div>
+      <div class="modal-foot">
+        ${d.status==='failed' ? `<button class="btn btn-primary" data-action="retry-ingestion" data-id="${d.id}">${icon('refresh')} Retry ingestion</button>` : ''}
+        <button class="btn" data-action="reupload-doc" data-id="${d.id}">Upload new version</button>
+        <button class="btn btn-danger" data-action="archive-doc" data-id="${d.id}">${icon('archive')} Deactivate</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- UPLOAD MODAL ---------------- */
+function renderUploadModal(){
+  return `
+  <div class="modal-overlay" data-action="close-modal">
+    <div class="modal" data-action="noop" style="max-width:560px;">
+      <div class="modal-head">
+        <h2>Upload documents</h2>
+        <button class="icon-btn" data-action="close-modal">${icon('x')}</button>
+      </div>
+      <div class="modal-body">
+        <div class="dropzone" id="dropzone" data-action="dropzone-click">
+          ${icon('upload')}
+          <h3>Drag files here, or click to browse</h3>
+          <p>PDF, DOCX, PPTX or XLSX — up to 50MB each. Multiple files supported.</p>
+          <input type="file" id="file-input" class="visually-hidden" multiple accept=".pdf,.docx,.pptx,.xlsx">
+        </div>
+        ${state.uploadFiles.map((f,i)=>renderUploadFileRow(f,i)).join('')}
+      </div>
+      <div class="modal-foot">
+        <button class="btn" data-action="close-modal">Done</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderUploadFileRow(f,i){
+  if(f.rejected){
+    return `<div class="file-row" style="border-color:rgba(214,104,94,.35)">
+      <div style="flex:1 1 auto;">
+        <div class="fname">${f.name}</div>
+        <div class="reject-msg">${icon('alert')} ${f.rejectReason}</div>
+      </div>
+      <button class="icon-btn" data-action="remove-upload-row" data-i="${i}">${icon('x')}</button>
+    </div>`;
+  }
+  const needsMeta = f.stage==='meta';
+  return `<div class="file-row" style="align-items:flex-start;">
+    <div style="flex:1 1 auto;">
+      <div class="fname">${f.name}</div>
+      <div class="fmeta">${f.size} · ${stageLabel(f.stage)}</div>
+      ${f.stage==='uploading' ? `<div class="file-progress"><div style="width:${f.progress}%"></div></div>` : ''}
+      ${needsMeta ? `
+        <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <select class="select-input" data-action="meta-dept" data-i="${i}">
+            <option ${f.dept==='FHA'?'selected':''}>FHA</option><option ${f.dept==='Conventional'?'selected':''}>Conventional</option>
+            <option ${f.dept==='VA'?'selected':''}>VA</option><option ${f.dept==='Underwriting'?'selected':''}>Underwriting</option>
+            <option ${f.dept==='Compliance'?'selected':''}>Compliance</option><option ${f.dept==='Servicing'?'selected':''}>Servicing</option>
+          </select>
+          <input class="text-input" placeholder="Version, e.g. 2026.1" data-action="meta-version" data-i="${i}" value="${f.version||''}">
+        </div>
+        <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:.78rem; color:var(--text-dim);">
+          <div class="switch ${f.requiresApproval?'on':''}" data-action="meta-approval" data-i="${i}"></div>
+          Requires compliance approval before going active
+        </label>
+        <button class="btn btn-primary btn-sm" style="margin-top:10px;" data-action="confirm-upload" data-i="${i}">Start upload</button>
+      ` : ''}
+    </div>
+    ${!needsMeta ? statusBadge(f.stage==='done'?'active':(f.stage==='processing'?'processing':(f.stage==='pending'?'pending_processing':f.stage))) : ''}
+  </div>`;
+}
+function stageLabel(stage){
+  return {meta:'Add metadata to begin upload', uploading:'Uploading…', pending:'Pending processing', processing:'Ingestion running (OCR, chunking, embedding)', done:'Active — searchable'}[stage] || stage;
+}
+
+/* ---------------- KNOWLEDGE GAP REVIEW ---------------- */
+function renderGapsView(){
+  const gf = state.gapFilter;
+  let rows = state.gaps.filter(g => (gf.showResolved || !g.resolved) && (gf.dept==='all' || g.dept===gf.dept));
+  rows.sort((a,b)=> gf.sort==='freq' ? b.freq-a.freq : new Date(b.ts)-new Date(a.ts));
+  const depts = [...new Set(state.gaps.map(g=>g.dept))];
+  const empty = state.gapsEmptyDemo || rows.length===0;
+  return `
+    <div class="page-head">
+      <h1>Knowledge Gap Review</h1>
+      <p>Queries that returned no confident match — a signal for what's missing or poorly indexed.</p>
+    </div>
+    <div class="panel">
+      <div class="filter-bar">
+        <select data-action="gap-filter-sort">
+          <option value="freq" ${gf.sort==='freq'?'selected':''}>Sort: Frequency</option>
+          <option value="recent" ${gf.sort==='recent'?'selected':''}>Sort: Most recent</option>
+        </select>
+        <select data-action="gap-filter-dept">
+          <option value="all">All departments</option>
+          ${depts.map(d=>`<option value="${d}" ${gf.dept===d?'selected':''}>${d}</option>`).join('')}
+        </select>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-dim);">
+          <input type="checkbox" data-action="gap-filter-resolved" ${gf.showResolved?'checked':''}> Show resolved
+        </label>
+      </div>
+      ${empty ? `
+        <div class="empty-row">
+          <div class="big-icon">${icon('checkCircle')}</div>
+          <div style="color:var(--text); font-weight:600; margin-bottom:4px;">No open knowledge gaps</div>
+          <div style="font-size:.82rem;">Every recent query returned a confident, sourced result. Nothing needs attention right now.</div>
+        </div>
+      ` : `
+        <table class="data-table">
+          <thead><tr><th>Query</th><th>Dept.</th><th>Role</th><th>Frequency</th><th>Last seen</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            ${rows.map(g=>`
+              <tr>
+                <td style="color:var(--text); max-width:340px;">${g.query}</td>
+                <td>${g.dept}</td>
+                <td class="mono-cell">${ROLES[g.role].short}</td>
+                <td class="mono-cell">${g.freq}×</td>
+                <td class="mono-cell">${fmtDate(g.ts)}</td>
+                <td>${g.resolved ? statusBadge('active') : `<span class="badge badge-pending"><span class="badge-dot"></span>Open</span>`}</td>
+                <td>${!g.resolved ? `<button class="btn btn-sm" data-action="resolve-gap" data-id="${g.id}">Mark resolved</button>` : ''}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      `}
+    </div>
+  `;
+}
+
+/* ---------------- ANALYTICS DASHBOARD ---------------- */
+function renderAnalyticsView(){
+  if(state.analyticsEmpty){
+    return `
+      <div class="page-head"><h1>Analytics Dashboard</h1><p>Aggregate usage and quality metrics.</p></div>
+      <div class="empty-row" style="border:1px solid var(--border); border-radius:var(--r-lg);">
+        <div class="big-icon" style="color:var(--tier-none)">${icon('chart')}</div>
+        <div style="color:var(--text); font-weight:600; margin-bottom:4px;">Not enough data yet</div>
+        <div style="font-size:.82rem;">This deployment has fewer than 7 days of query history. Charts will populate as usage grows.</div>
+      </div>`;
+  }
+  const volumeData = [
+    {l:'Jul 12', v:64},{l:'Jul 13', v:71},{l:'Jul 14', v:58},{l:'Jul 15', v:83},{l:'Jul 16', v:90},{l:'Jul 17', v:76},{l:'Jul 18', v:41},
+  ];
+  const maxV = Math.max(...volumeData.map(x=>x.v));
+  const confDist = [
+    {l:'Verified (90+)', v:52, c:'var(--tier-high)'}, {l:'Verify source (75–89)', v:27, c:'var(--tier-medium)'},
+    {l:'Low confidence (50–74)', v:14, c:'var(--tier-low)'}, {l:'No match (<50)', v:7, c:'var(--tier-none)'},
+  ];
+  const topQueries = ['Minimum credit score for FHA loan','PMI removal before 78% LTV','VA funding fee exemption','Self-employed income documentation','Flood zone appeal process'];
+  const topDocs = [{n:'HUD Handbook 4000.1', v:142},{n:'Fannie Mae Selling Guide', v:98},{n:'PMI Cancellation Policy', v:71},{n:'VA Loan Guaranty Manual', v:54},{n:'State Disclosure Reqs — CA', v:33}];
+  return `
+    <div class="page-head" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div><h1>Analytics Dashboard</h1><p>Last 7 days · all roles</p></div>
+      <select class="select-input" style="width:auto;" data-action="analytics-range"><option>Last 7 days</option><option>Last 30 days</option><option>Quarter to date</option></select>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">483</div><div class="lbl">Total queries</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--tier-high)">52%</div><div class="lbl">High confidence</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--tier-none)">7%</div><div class="lbl">No confident match</div></div>
+      <div class="stat-card"><div class="num">76%</div><div class="lbl">Feedback positive rate</div></div>
+    </div>
+    <div class="chart-card">
+      <h3>Query volume</h3>
+      ${volumeData.map(d=>`
+        <div class="bar-row"><div class="blabel">${d.l}</div><div class="bar-track"><div class="bar-fill" style="width:${(d.v/maxV*100).toFixed(0)}%"></div></div><div class="bar-val">${d.v}</div></div>
+      `).join('')}
+    </div>
+    <div class="chart-card">
+      <h3>Confidence distribution <span style="font-weight:400; color:var(--text-faint);">— rising "no match" share is worth watching</span></h3>
+      ${confDist.map(d=>`
+        <div class="bar-row"><div class="blabel">${d.l}</div><div class="bar-track"><div class="bar-fill" style="width:${d.v}%; background:${d.c}"></div></div><div class="bar-val">${d.v}%</div></div>
+      `).join('')}
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4);">
+      <div class="chart-card" style="margin-bottom:0;">
+        <h3>Top queries</h3>
+        ${topQueries.map((q,i)=>`<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-soft);font-size:.82rem;"><span class="mono" style="color:var(--text-faint);">${i+1}</span>${q}</div>`).join('')}
+      </div>
+      <div class="chart-card" style="margin-bottom:0;">
+        <h3>Most-cited source documents</h3>
+        ${topDocs.map(d=>`<div class="bar-row"><div class="blabel">${d.n}</div><div class="bar-track"><div class="bar-fill" style="width:${(d.v/142*100).toFixed(0)}%; background:var(--accent-strong)"></div></div><div class="bar-val">${d.v}</div></div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------- AUDIT LOG ---------------- */
+function renderAuditView(){
+  const af = state.auditFilter;
+  let rows = state.audit.filter(a => (af.user==='all' || a.user===af.user) && a.confidence>=af.minConf && (!af.q || a.query.toLowerCase().includes(af.q.toLowerCase())));
+  const users = [...new Set(state.audit.map(a=>a.user))];
+  return `
+    <div class="page-head" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div><h1>Audit Log</h1><p>Immutable record of every query — who asked, what was retrieved, and at what confidence.</p></div>
+      <button class="btn" data-action="export-audit">${icon('download')} Export CSV</button>
+    </div>
+    <div class="panel">
+      <div class="filter-bar">
+        ${icon('filter')}
+        <select data-action="audit-filter-user"><option value="all">All users</option>${users.map(u=>`<option ${af.user===u?'selected':''}>${u}</option>`).join('')}</select>
+        <select data-action="audit-filter-conf">
+          <option value="0" ${af.minConf===0?'selected':''}>Any confidence</option>
+          <option value="90" ${af.minConf===90?'selected':''}>90+ only</option>
+          <option value="75" ${af.minConf===75?'selected':''}>75+ only</option>
+          <option value="50" ${af.minConf===50?'selected':''}>50+ only</option>
+        </select>
+        <input type="text" placeholder="Search query text…" id="audit-q" value="${escapeAttr(af.q)}" data-action="audit-filter-q">
+      </div>
+      ${rows.length===0 ? `<div class="empty-row">No log entries match these filters.</div>` : `
+        <table class="data-table">
+          <thead><tr><th>Timestamp</th><th>User</th><th>Query</th><th>Confidence</th><th>Response ID</th></tr></thead>
+          <tbody>
+            ${rows.map(a=>`
+              <tr class="clickable" data-action="toggle-audit-row" data-id="${a.id}">
+                <td class="mono-cell">${fmtDate(a.ts)}</td>
+                <td>${a.user}</td>
+                <td style="color:var(--text)">${a.query}</td>
+                <td><span style="color:${tierMeta(a.tier).c}; font-family:var(--font-mono); font-weight:600;">${a.confidence}</span></td>
+                <td class="mono-cell">${a.rid}</td>
+              </tr>
+              ${state.auditExpandedRow===a.id ? `
+                <tr class="row-detail"><td colspan="5">
+                  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; font-size:.8rem;">
+                    <div><div class="rcard-section-title">Role</div>${ROLES[a.role].label}</div>
+                    <div><div class="rcard-section-title">Documents cited</div>${a.docs.length ? a.docs.join(', ') : '—'}</div>
+                    <div><div class="rcard-section-title">Response ID</div><span class="mono">${a.rid}</span></div>
+                  </div>
+                </td></tr>
+              ` : ''}
+            `).join('')}
+          </tbody>
+        </table>
+      `}
+    </div>
+  `;
+}
+
+/* ---------------- USER & ROLE MANAGEMENT ---------------- */
+function renderUsersView(){
+  return `
+    <div class="page-head" style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+      <div><h1>User &amp; Role Management</h1><p>Assign roles and department-level access.</p></div>
+      <button class="btn btn-primary" data-action="add-user">${icon('plus')} Invite user</button>
+    </div>
+    <div class="panel">
+      <table class="data-table">
+        <thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Role</th></tr></thead>
+        <tbody>
+          ${state.users.map(u=>`
+            <tr>
+              <td style="color:var(--text)">${u.name}</td>
+              <td class="mono-cell">${u.email}</td>
+              <td>${u.dept}</td>
+              <td>
+                <select class="select-input" style="width:auto;" data-action="change-user-role" data-id="${u.id}">
+                  ${Object.entries(ROLES).map(([k,r])=>`<option value="${k}" ${u.role===k?'selected':''}>${r.label}</option>`).join('')}
+                </select>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ---------------- SETTINGS ---------------- */
+function renderSettingsView(){
+  return `
+    <div class="page-head"><h1>Account &amp; Settings</h1></div>
+    <div class="panel" style="padding:var(--sp-5);">
+      <div class="settings-row">
+        <div><div class="st">Voice input mode</div><div class="sd">Tap-to-toggle starts and stops listening with one tap. Push-to-talk listens only while held — better for noisy offices.</div></div>
+        <div class="switch ${state.voice.pushToTalk?'on':''}" data-action="toggle-push-to-talk"></div>
+      </div>
+      <div class="settings-row">
+        <div><div class="st">Read Required Documents &amp; Next Steps aloud</div><div class="sd">Off by default — most people find checklists easier to scan visually. When on, Listen also reads these sections after the excerpt.</div></div>
+        <div class="switch ${state.tts.readStepsToo?'on':''}" data-action="toggle-read-steps"></div>
+      </div>
+      <div class="settings-row">
+        <div><div class="st">Signed in as</div><div class="sd">${state.userName} · ${ROLES[state.role].label}</div></div>
+        <button class="btn btn-sm" data-action="logout">Log out</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------- MODAL dispatcher ---------------- */
+function renderModal(){
+  if(!state.modal) return '';
+  if(state.modal.type==='upload') return renderUploadModal();
+  if(state.modal.type==='docDetail') return renderDocDetailModal(state.modal.id);
+  if(state.modal.type==='source') return renderSourceModal(state.modal.id);
+  if(state.modal.type==='sessionExpired') return renderSessionExpiredModal();
+  if(state.modal.type==='addUser') return renderAddUserModal();
+  return '';
+}
+
+function renderSourceModal(pkgId){
+  const pkg = PACKAGES[pkgId];
+  if(!pkg) return '';
+  return `
+  <div class="modal-overlay" data-action="close-modal">
+    <div class="modal" data-action="noop">
+      <div class="modal-head">
+        <div>
+          <div class="topbar-crumb">Source document</div>
+          <h2>${pkg.source.doc}</h2>
+        </div>
+        <button class="icon-btn" data-action="close-modal">${icon('x')}</button>
+      </div>
+      <div class="modal-body">
+        <div class="field"><label class="field-label">Section</label><div>${pkg.source.section}</div></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="field"><label class="field-label">Page</label><div class="mono">${pkg.source.page}</div></div>
+          <div class="field"><label class="field-label">Version</label><div class="mono">${pkg.source.version}</div></div>
+        </div>
+        <div class="field"><label class="field-label">Last updated</label><div class="mono">${pkg.source.updated}</div></div>
+        <div class="rcard-section-title" style="margin-top:6px;">Matched passage</div>
+        <blockquote class="excerpt">${pkg.excerpt}</blockquote>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-primary" data-action="close-modal">${icon('external')} Open full document (not available in this preview)</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSessionExpiredModal(){
+  return `
+  <div class="modal-overlay">
+    <div class="modal" data-action="noop" style="max-width:400px;">
+      <div class="modal-body" style="text-align:center; padding-top:var(--sp-6);">
+        <div class="state-icon" style="background:var(--tier-medium-bg); color:var(--tier-medium); margin-bottom:var(--sp-4);">${icon('alert')}</div>
+        <h2 style="margin:0 0 8px;">Your session expired</h2>
+        <p style="color:var(--text-dim); font-size:.85rem; margin:0 0 var(--sp-5);">Sign in again to continue — your current search will still be here.</p>
+        <button class="btn btn-primary" style="width:100%; justify-content:center; padding:11px;" data-action="resume-session">Sign in to continue</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAddUserModal(){
+  return `
+  <div class="modal-overlay" data-action="close-modal">
+    <div class="modal" data-action="noop">
+      <div class="modal-head"><h2>Invite user</h2><button class="icon-btn" data-action="close-modal">${icon('x')}</button></div>
+      <div class="modal-body">
+        <div class="field"><label class="field-label">Full name</label><input class="text-input" id="new-user-name" placeholder="Jordan Blake"></div>
+        <div class="field"><label class="field-label">Work email</label><input class="text-input" id="new-user-email" placeholder="jordan.b@ledgerhq.com"></div>
+        <div class="field"><label class="field-label">Role</label>
+          <select class="select-input" id="new-user-role">${Object.entries(ROLES).map(([k,r])=>`<option value="${k}">${r.label}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn" data-action="close-modal">Cancel</button><button class="btn btn-primary" data-action="confirm-add-user">Send invite</button></div>
+    </div>
+  </div>`;
+}
+
+/* ---------------- DEMO / PREVIEW-STATES CONTROLS ---------------- */
+function renderDemoControls(){
+  return `
+    <button class="demo-fab" data-action="toggle-demo" title="Preview states (design review only)">${icon('gear')}</button>
+    ${state.demoOpen ? `
+      <div class="demo-panel">
+        <h4>Preview states</h4>
+        <div class="hint">For design review — lets you reach every state without a live backend.</div>
+        <div class="demo-row">
+          ${['auto','high','medium','low','none','error'].map(k=>`<button class="demo-btn ${state.demoForce===k || (k==='auto' && !state.demoForce) ?'on':''}" data-action="set-demo-force" data-k="${k}">${k}</button>`).join('')}
+        </div>
+        <h4 style="margin-top:14px;">Next voice input outcome</h4>
+        <div class="demo-row">
+          ${['normal','no_speech','low_confidence','denied'].map(k=>`<button class="demo-btn ${state.voiceDemoForce===k || (k==='normal' && !state.voiceDemoForce)?'on':''}" data-action="set-voice-demo-force" data-k="${k}">${k.replace('_',' ')}</button>`).join('')}
+        </div>
+        <div class="demo-toggle-row"><span>Force session expiry</span><button class="demo-btn" data-action="force-session-expiry">Trigger</button></div>
+        <div class="demo-toggle-row"><span>Analytics empty state</span><div class="switch ${state.analyticsEmpty?'on':''}" data-action="toggle-analytics-empty"></div></div>
+        <div class="demo-toggle-row"><span>Gaps empty state</span><div class="switch ${state.gapsEmptyDemo?'on':''}" data-action="toggle-gaps-empty"></div></div>
+      </div>
+    ` : ''}
+  `;
+}
+
+/* ---------------- SEARCH logic ---------------- */
+const PACKAGES_BY_TIER = { high:PACKAGES.fha_credit, medium:PACKAGES.pmi_removal, low:PACKAGES.self_employed };
+
+function matchPackage(query){
+  const q = query.toLowerCase();
+  if(q.includes('fha') || q.includes('credit score')) return PACKAGES.fha_credit;
+  if(q.includes('pmi') || q.includes('ltv')) return PACKAGES.pmi_removal;
+  if(q.includes('self-employ') || q.includes('self employ') || q.includes('1099') || q.includes('income document')) return PACKAGES.self_employed;
+  return null;
+}
+
+function otherMatchesFor(pkg){
+  return Object.values(PACKAGES).filter(p=>p.id!==pkg.id).slice(0,2).map(p=>({id:p.id, title:p.title, excerpt:p.excerpt.slice(0,90)+'…'}));
+}
+
+function logGap(query){
+  const exists = state.gaps.find(g=>g.query.toLowerCase()===query.toLowerCase());
+  if(exists){ exists.freq += 1; exists.ts = new Date().toISOString(); return; }
+  state.gaps.unshift({id:'g'+Date.now(), query, ts:new Date().toISOString(), freq:1, role:state.role, dept: state.role==='underwriter'?'Underwriting':'Retail Lending', resolved:false});
+}
+function logAudit(query, pkg){
+  state.audit.unshift({id:'a'+Date.now(), user:state.userName, role:state.role, query, ts:new Date().toISOString(), confidence:pkg.score, tier:pkg.tier, docs:[pkg.source.doc], rid:'RSP-'+Math.floor(80000+Math.random()*9000)});
+}
+
+function runSearch(query){
+  query = (query||'').trim();
+  if(!query) return;
+  state.lastQuery = query;
+  state.results = null;
+  state.loading = true;
+  state.loadingPhraseIndex = 0;
+  state.expandedConfidence = null;
+  update();
+  if(loadingPhraseTimer) clearInterval(loadingPhraseTimer);
+  loadingPhraseTimer = setInterval(()=>{
+    state.loadingPhraseIndex = (state.loadingPhraseIndex + 1) % RETRIEVAL_PHRASES.length;
+    update();
+  }, 850);
+  setTimeout(()=>{
+    clearInterval(loadingPhraseTimer);
+    loadingPhraseTimer = null;
+    state.loading = false;
+    const forced = state.demoForce;
+    if(forced === 'error'){ state.results = {mode:'error', query}; update(); return; }
+    if(forced === 'none'){ state.results = {mode:'no_match', query}; logGap(query); update(); return; }
+    let pkg = (forced && PACKAGES_BY_TIER[forced]) ? PACKAGES_BY_TIER[forced] : matchPackage(query);
+    if(!pkg){
+      state.results = {mode:'no_match', query};
+      logGap(query);
+    } else {
+      state.results = {mode:'result', pkg, others: otherMatchesFor(pkg)};
+      logAudit(query, pkg);
+    }
+    update();
+  }, 700);
+}
+
+/* ---------------- VOICE INPUT ---------------- */
+function ensureRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  if(recognition) return recognition;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  recognition.onresult = (e)=>{
+    let interim = '', final = '';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const input = document.getElementById('search-input');
+    if(input) input.value = final || interim;
+    if(final){
+      state.voice.status = 'processing';
+      update();
+      setTimeout(()=>{
+        state.voice.status = 'idle';
+        state.lastQuery = final.trim();
+        update();
+        const inp = document.getElementById('search-input');
+        if(inp){ inp.value = final.trim(); inp.focus(); }
+      }, 450);
+    }
+  };
+  recognition.onerror = (e)=>{
+    if(e.error === 'no-speech') state.voice.status = 'no_speech';
+    else if(e.error === 'not-allowed' || e.error === 'service-not-allowed') state.voice.status = 'denied';
+    else state.voice.status = 'error';
+    update();
+  };
+  recognition.onend = ()=>{
+    if(state.voice.status === 'listening'){ state.voice.status = 'idle'; update(); }
+  };
+  return recognition;
+}
+
+function micToggle(){
+  const v = state.voice;
+  if(v.pushToTalk) return; // handled by press-and-hold instead
+  if(v.status === 'listening'){ stopListening(); return; }
+  if(v.status === 'permission' || v.status === 'processing') return;
+  startListening();
+}
+
+function startListening(){
+  state.voice.status = 'permission';
+  update();
+  setTimeout(()=>{
+    const forcedVoice = state.voiceDemoForce;
+    if(forcedVoice === 'denied'){
+      state.voice.status = 'denied'; update();
+      setTimeout(()=>{ if(state.voice.status==='denied'){ state.voice.status='idle'; update(); } }, 2400);
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(SR && !forcedVoice){
+      try{
+        const rec = ensureRecognition();
+        state.voice.status = 'listening';
+        update();
+        rec.start();
+        return;
+      }catch(e){ /* fall back to simulated flow below */ }
+    }
+    runSimulatedVoice(forcedVoice);
+  }, 480);
+}
+
+function stopListening(){
+  if(recognition){ try{ recognition.stop(); }catch(e){} }
+  if(listenTimeout) clearTimeout(listenTimeout);
+  state.voice.status = 'idle';
+  update();
+}
+
+function runSimulatedVoice(forced){
+  state.voice.status = 'listening';
+  update();
+  if(forced === 'no_speech'){
+    listenTimeout = setTimeout(()=>{
+      state.voice.status = 'no_speech'; update();
+      setTimeout(()=>{ if(state.voice.status==='no_speech'){ state.voice.status='idle'; update(); } }, 2200);
+    }, 1700);
+    return;
+  }
+  const demoLines = [
+    'What documents are needed for a VA loan appraisal',
+    'Can PMI be removed before seventy eight percent LTV',
+    'Minimum credit score for an FHA loan',
+  ];
+  const line = demoLines[Math.floor(Math.random()*demoLines.length)];
+  const words = line.split(' ');
+  let wi = 0, partial = '';
+  const iv = setInterval(()=>{
+    partial += (wi ? ' ' : '') + words[wi]; wi++;
+    const input = document.getElementById('search-input');
+    if(input) input.value = partial;
+    if(wi >= words.length){
+      clearInterval(iv);
+      listenTimeout = setTimeout(()=>{
+        state.voice.status = 'processing'; update();
+        setTimeout(()=>{
+          state.voice.status = (forced === 'low_confidence') ? 'low_confidence' : 'idle';
+          state.lastQuery = line;
+          update();
+          const inp = document.getElementById('search-input');
+          if(inp){ inp.value = line; inp.focus(); }
+          if(forced === 'low_confidence'){
+            setTimeout(()=>{ if(state.voice.status==='low_confidence'){ state.voice.status='idle'; update(); } }, 2600);
+          }
+        }, 480);
+      }, 280);
+    }
+  }, 150);
+}
+
+/* ---------------- VOICE OUTPUT (real speechSynthesis) ---------------- */
+function startTTS(pkg){
+  if(!('speechSynthesis' in window)){ toast("This browser doesn't support text-to-speech."); return; }
+  window.speechSynthesis.cancel();
+  state.tts.activeId = pkg.id;
+  state.tts.status = 'buffering';
+  state.tts.progress = 0;
+  update();
+  setTimeout(()=>{
+    let text = pkg.excerpt + ` According to ${pkg.source.doc}, ${pkg.source.section}.`;
+    if(state.tts.readStepsToo){
+      text += ' Required documents: ' + pkg.docsNeeded.join(', ') + '. Next steps: ' + pkg.steps.join('. ') + '.';
+    }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.98;
+    utter.onboundary = (e)=>{ state.tts.progress = Math.min(100, Math.round((e.charIndex/text.length)*100)); update(); };
+    utter.onend = ()=>{ state.tts.status='idle'; state.tts.activeId=null; state.tts.progress=0; update(); };
+    utter.onerror = ()=>{ toast('Voice playback hit an error.'); state.tts.status='idle'; state.tts.activeId=null; update(); };
+    state.tts.status = 'playing';
+    update();
+    window.speechSynthesis.speak(utter);
+  }, 320);
+}
+function pauseResumeTTS(){
+  if(!('speechSynthesis' in window)) return;
+  if(state.tts.status === 'playing'){ window.speechSynthesis.pause(); state.tts.status = 'paused'; update(); }
+  else if(state.tts.status === 'paused'){ window.speechSynthesis.resume(); state.tts.status = 'playing'; update(); }
+}
+function stopTTS(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  state.tts.status = 'idle'; state.tts.activeId = null; state.tts.progress = 0; update();
+}
+
+/* ---------------- FEEDBACK ---------------- */
+function handleFeedback(id, vote){
+  const current = state.feedback[id];
+  if(current === vote){ delete state.feedback[id]; state.feedbackReasonOpenFor=null; update(); return; }
+  state.feedback[id] = vote;
+  if(vote === 'down'){
+    state.feedbackReasonOpenFor = id;
+    update();
+  } else {
+    state.feedbackReasonOpenFor = null;
+    showAck(id, 'Thanks — recorded');
+  }
+}
+
+function copyExcerpt(pkg){
+  const text = pkg.excerpt + ' — ' + pkg.source.doc + ', ' + pkg.source.section + '.';
+  const onDone = ()=> showAck(pkg.id, 'Copied');
+  const onFail = ()=> toast("Couldn't copy — please select the text manually.");
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(onDone).catch(()=>fallbackCopy(text, onDone, onFail));
+  } else {
+    fallbackCopy(text, onDone, onFail);
+  }
+}
+function fallbackCopy(text, onDone, onFail){
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    ok ? onDone() : onFail();
+  }catch(e){ onFail(); }
+}
+
+/* ---------------- UPLOAD ---------------- */
+function humanSize(bytes){
+  if(bytes < 1024*1024) return Math.round(bytes/1024)+' KB';
+  return (bytes/(1024*1024)).toFixed(1)+' MB';
+}
+function handleFilesSelected(fileList){
+  const valid = ['pdf','docx','pptx','xlsx'];
+  Array.from(fileList).forEach(file=>{
+    const ext = file.name.split('.').pop().toLowerCase();
+    if(!valid.includes(ext)){
+      state.uploadFiles.push({name:file.name, rejected:true, rejectReason:`.${ext} isn't a supported file type. Use PDF, DOCX, PPTX or XLSX.`});
+      return;
+    }
+    if(file.size > 50*1024*1024){
+      state.uploadFiles.push({name:file.name, rejected:true, rejectReason:'File exceeds the 50MB limit.'});
+      return;
+    }
+    state.uploadFiles.push({name:file.name, size:humanSize(file.size), stage:'meta', dept:'FHA', version:'', requiresApproval:true});
+  });
+  update();
+}
+function confirmUpload(i){
+  const f = state.uploadFiles[i];
+  if(!f) return;
+  f.stage = 'uploading'; f.progress = 0;
+  update();
+  const iv = setInterval(()=>{
+    f.progress += 16 + Math.random()*12;
+    if(f.progress >= 100){
+      f.progress = 100; clearInterval(iv);
+      f.stage = 'pending';
+      update();
+      setTimeout(()=>{
+        f.stage = 'processing'; update();
+        setTimeout(()=>{
+          f.stage = f.requiresApproval ? 'pending_approval' : 'done';
+          update();
+          if(f.stage === 'done') addFileToLibrary(f);
+        }, 2400);
+      }, 900);
+    } else { update(); }
+  }, 260);
+}
+function addFileToLibrary(f){
+  if(f.addedToLibrary) return;
+  f.addedToLibrary = true;
+  state.docs.unshift({id:'d'+Date.now(), name:f.name, dept:f.dept, type:'Document', version:f.version||'v1', status:'active', requiresApproval:f.requiresApproval, updated:new Date().toISOString().slice(0,10)});
+}
+
+/* ---------------- init ---------------- */
+function doLogin(email){
+  const pickedRole = state.loginSelectedRole;
+  const found = state.users.find(u=>u.email.toLowerCase()===email.toLowerCase());
+  if(pickedRole){
+    // explicit "preview as role" choice always wins over the email match
+    state.role = pickedRole;
+    const roleUser = state.users.find(u=>u.role===pickedRole);
+    state.userName = (found && found.role===pickedRole) ? found.name : (roleUser ? roleUser.name : ROLES[pickedRole].label);
+  } else if(found){
+    state.role = found.role;
+    state.userName = found.name;
+  } else {
+    state.role = 'loan_officer';
+    state.userName = 'Guest Reviewer';
+  }
+  state.authed = true;
+  state.view = 'search';
+  state.loginError = false;
+}
+
+/* ---------------- EVENT DELEGATION ---------------- */
+function wireEvents(){
+  const app = el();
+
+  app.addEventListener('click', (e)=>{
+    const t = e.target.closest('[data-action]');
+    if(!t) return;
+    const action = t.dataset.action;
+    if(action === 'noop') return;
+
+    switch(action){
+      case 'login-submit': {
+        const email = document.getElementById('login-email').value;
+        doLogin(email);
+        update();
+        break;
+      }
+      case 'search-submit': {
+        const inp = document.getElementById('search-input');
+        runSearch(inp ? inp.value : state.lastQuery);
+        break;
+      }
+      case 'select-role': state.loginSelectedRole = t.dataset.role; update(); break;
+      case 'nav': state.view = t.dataset.view; state.modal=null; update(); break;
+      case 'logout':
+        stopTTS(); stopListening();
+        Object.assign(state, {authed:false, role:null, userName:'', view:'search', results:null, modal:null, loginSelectedRole:null});
+        update();
+        break;
+
+      case 'run-example': {
+        const q = t.dataset.q;
+        const inp = document.getElementById('search-input'); if(inp) inp.value = q;
+        runSearch(q);
+        break;
+      }
+      case 'mic-toggle': micToggle(); break;
+      case 'mic-cancel': stopListening(); break;
+      case 'retry-search': runSearch(state.lastQuery); break;
+      case 'contact-compliance': toast('A note was sent to Compliance about this gap.'); break;
+      case 'promote-other': {
+        const pkg = PACKAGES[t.dataset.id];
+        if(pkg) { state.results = {mode:'result', pkg, others: otherMatchesFor(pkg)}; update(); }
+        break;
+      }
+      case 'toggle-confidence': {
+        const id = t.dataset.id;
+        state.expandedConfidence = state.expandedConfidence === id ? null : id;
+        update();
+        break;
+      }
+      case 'view-source': state.modal = {type:'source', id:t.dataset.id}; update(); break;
+      case 'toggle-listen': {
+        const id = t.dataset.id; const pkg = PACKAGES[id];
+        if(state.tts.activeId === id){
+          if(state.tts.status==='playing' || state.tts.status==='paused') pauseResumeTTS();
+          else startTTS(pkg);
+        } else startTTS(pkg);
+        break;
+      }
+      case 'tts-toggle-pause': pauseResumeTTS(); break;
+      case 'tts-stop': stopTTS(); break;
+      case 'copy-excerpt': {
+        const pkg = PACKAGES[t.dataset.id];
+        if(pkg) copyExcerpt(pkg);
+        break;
+      }
+      case 'rerun-search': runSearch(state.lastQuery); break;
+      case 'feedback': handleFeedback(t.dataset.id, t.dataset.vote); break;
+      case 'feedback-reason':
+        state.feedbackReasonOpenFor = null;
+        showAck(t.dataset.id, 'Noted — ' + t.dataset.reason);
+        break;
+      case 'feedback-reason-skip':
+        state.feedbackReasonOpenFor = null;
+        showAck(t.dataset.id, 'Thanks — recorded');
+        break;
+
+      case 'open-upload': state.modal = {type:'upload'}; state.uploadFiles = []; update(); break;
+      case 'dropzone-click': document.getElementById('file-input').click(); break;
+      case 'remove-upload-row': state.uploadFiles.splice(Number(t.dataset.i),1); update(); break;
+      case 'confirm-upload': confirmUpload(Number(t.dataset.i)); break;
+      case 'approve-file': {
+        const f = state.uploadFiles[Number(t.dataset.i)];
+        if(f){ f.stage='done'; addFileToLibrary(f); update(); toast('Document approved and now active.'); }
+        break;
+      }
+      case 'meta-approval': {
+        const f = state.uploadFiles[Number(t.dataset.i)];
+        if(f){ f.requiresApproval = !f.requiresApproval; update(); }
+        break;
+      }
+      case 'open-doc-detail': state.modal = {type:'docDetail', id:t.dataset.id}; update(); break;
+      case 'retry-ingestion': {
+        const d = state.docs.find(x=>x.id===t.dataset.id);
+        if(d){ d.status='processing'; update(); setTimeout(()=>{ d.status='active'; delete d.failReason; update(); toast('Ingestion succeeded — document is now active.'); }, 1800); }
+        break;
+      }
+      case 'reupload-doc': state.modal = {type:'upload'}; state.uploadFiles=[]; toast('Upload the replacement file below.'); update(); break;
+      case 'archive-doc': {
+        state.docs = state.docs.filter(x=>x.id!==t.dataset.id);
+        state.modal = null; update(); toast('Document deactivated and removed from the index.');
+        break;
+      }
+      case 'close-modal': state.modal = null; update(); break;
+
+      case 'resolve-gap': {
+        const g = state.gaps.find(x=>x.id===t.dataset.id);
+        if(g){ g.resolved = true; update(); toast('Marked as resolved.'); }
+        break;
+      }
+      case 'export-audit': exportAuditCSV(); break;
+      case 'toggle-audit-row': state.auditExpandedRow = state.auditExpandedRow===t.dataset.id ? null : t.dataset.id; update(); break;
+
+      case 'add-user': state.modal = {type:'addUser'}; update(); break;
+      case 'confirm-add-user': {
+        const name = document.getElementById('new-user-name').value.trim() || 'New teammate';
+        const email = document.getElementById('new-user-email').value.trim() || 'new.user@ledgerhq.com';
+        const role = document.getElementById('new-user-role').value;
+        state.users.push({id:'u'+Date.now(), name, email, role, dept:'—'});
+        state.modal = null; update(); toast('Invite sent to '+email+'.');
+        break;
+      }
+
+      case 'toggle-push-to-talk': state.voice.pushToTalk = !state.voice.pushToTalk; update(); break;
+      case 'toggle-read-steps': state.tts.readStepsToo = !state.tts.readStepsToo; update(); break;
+
+      case 'toggle-demo': state.demoOpen = !state.demoOpen; update(); break;
+      case 'set-demo-force': state.demoForce = t.dataset.k==='auto' ? null : t.dataset.k; update(); break;
+      case 'set-voice-demo-force': state.voiceDemoForce = t.dataset.k==='normal' ? null : t.dataset.k; update(); break;
+      case 'toggle-analytics-empty': state.analyticsEmpty = !state.analyticsEmpty; update(); break;
+      case 'toggle-gaps-empty': state.gapsEmptyDemo = !state.gapsEmptyDemo; update(); break;
+      case 'force-session-expiry':
+        state.sessionPreservedQuery = state.lastQuery;
+        state.modal = {type:'sessionExpired'}; state.demoOpen=false; update();
+        break;
+      case 'resume-session':
+        state.modal = null; update();
+        toast('Signed back in — your search was preserved.');
+        break;
+      case 'analytics-range': break;
+    }
+  });
+
+  app.addEventListener('change', (e)=>{
+    if(e.target && e.target.id === 'file-input'){
+      handleFilesSelected(e.target.files);
+      e.target.value = '';
+      return;
+    }
+    const t = e.target.closest('[data-action]');
+    if(!t) return;
+    const action = t.dataset.action;
+    if(action === 'gap-filter-sort'){ state.gapFilter.sort = t.value; update(); }
+    if(action === 'gap-filter-dept'){ state.gapFilter.dept = t.value; update(); }
+    if(action === 'gap-filter-resolved'){ state.gapFilter.showResolved = t.checked; update(); }
+    if(action === 'audit-filter-user'){ state.auditFilter.user = t.value; update(); }
+    if(action === 'audit-filter-conf'){ state.auditFilter.minConf = Number(t.value); update(); }
+    if(action === 'change-user-role'){
+      const u = state.users.find(x=>x.id===t.dataset.id);
+      if(u){ u.role = t.value; update(); toast('Role updated.'); }
+    }
+    if(action === 'meta-dept'){ const f = state.uploadFiles[Number(t.dataset.i)]; if(f) f.dept = t.value; }
+    if(action === 'meta-version'){ const f = state.uploadFiles[Number(t.dataset.i)]; if(f) f.version = t.value; }
+  });
+
+  app.addEventListener('input', (e)=>{
+    const t = e.target.closest('[data-action]');
+    if(!t) return;
+    if(t.dataset.action === 'audit-filter-q'){ state.auditFilter.q = t.value; update(); }
+    if(t.dataset.action === 'meta-version'){ const f = state.uploadFiles[Number(t.dataset.i)]; if(f) f.version = t.value; }
+  });
+
+  app.addEventListener('dragover', (e)=>{
+    if(e.target.closest('#dropzone')){ e.preventDefault(); document.getElementById('dropzone').classList.add('dragover'); }
+  });
+  app.addEventListener('dragleave', (e)=>{
+    if(e.target.closest('#dropzone')){ document.getElementById('dropzone').classList.remove('dragover'); }
+  });
+  app.addEventListener('drop', (e)=>{
+    if(e.target.closest('#dropzone')){
+      e.preventDefault();
+      document.getElementById('dropzone').classList.remove('dragover');
+      if(e.dataTransfer.files && e.dataTransfer.files.length) handleFilesSelected(e.dataTransfer.files);
+    }
+  });
+
+  // push-to-talk: press-and-hold behaviour when enabled in Settings
+  app.addEventListener('mousedown', (e)=>{
+    const t = e.target.closest('[data-action="mic-toggle"]');
+    if(t && state.voice.pushToTalk && state.voice.status === 'idle') startListening();
+  });
+  window.addEventListener('mouseup', ()=>{
+    if(state.voice.pushToTalk && state.voice.status === 'listening') stopListening();
+  });
+  app.addEventListener('touchstart', (e)=>{
+    const t = e.target.closest('[data-action="mic-toggle"]');
+    if(t && state.voice.pushToTalk && state.voice.status === 'idle'){ e.preventDefault(); startListening(); }
+  }, {passive:false});
+  window.addEventListener('touchend', ()=>{
+    if(state.voice.pushToTalk && state.voice.status === 'listening') stopListening();
+  });
+
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape'){
+      if(state.modal && state.modal.type !== 'sessionExpired'){ state.modal = null; update(); }
+      else if(state.voice.status === 'listening'){ stopListening(); }
+      return;
+    }
+    if(e.key === 'Enter'){
+      if(e.target && e.target.id === 'login-email' || e.target && e.target.id === 'login-pass'){
+        e.preventDefault();
+        doLogin(document.getElementById('login-email').value);
+        update();
+      } else if(e.target && e.target.id === 'search-input'){
+        e.preventDefault();
+        runSearch(e.target.value);
+      }
+    }
+  });
+}
+
+function exportAuditCSV(){
+  const af = state.auditFilter;
+  const rows = state.audit.filter(a => (af.user==='all'||a.user===af.user) && a.confidence>=af.minConf && (!af.q || a.query.toLowerCase().includes(af.q.toLowerCase())));
+  const header = ['Timestamp','User','Role','Query','Confidence','Tier','Documents Cited','Response ID'];
+  const csvRows = [header.join(',')];
+  rows.forEach(a=>{
+    csvRows.push([a.ts, a.user, ROLES[a.role].label, '"'+a.query.replace(/"/g,'""')+'"', a.confidence, a.tier, '"'+a.docs.join('; ')+'"', a.rid].join(','));
+  });
+  const blob = new Blob([csvRows.join('\n')], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ledger-audit-log.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Audit log exported.');
+}
+
+/* ---------------- bootstrap ---------------- */
+try{
+  wireEvents();
+  fullRender();
+}catch(err){
+  document.getElementById('app').innerHTML =
+    '<div style="max-width:640px;margin:80px auto;padding:24px;background:#1a1c23;border:1px solid #d6685e;border-radius:12px;color:#e9e7e1;font-family:sans-serif;">' +
+    '<h2 style="color:#d6685e;margin-top:0;">Ledger failed to start</h2>' +
+    '<p>Something threw an error before the interface could render. Details below — this is safe to share for debugging:</p>' +
+    '<pre style="white-space:pre-wrap;background:#111217;padding:12px;border-radius:8px;font-size:12px;overflow:auto;">' +
+    (err && err.stack ? err.stack : String(err)) +
+    '</pre></div>';
+  console.error('Ledger bootstrap error:', err);
+}
+</script>
+</body>
+</html>
