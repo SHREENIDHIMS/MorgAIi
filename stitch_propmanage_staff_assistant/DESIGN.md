@@ -1,4 +1,4 @@
----
+---https://www.figma.com/design/pvIKeSrUSRYHKObzK9DRGW/AI-Chatbot-UI--Community-?node-id=0-1&m=dev&t=3WICAMvODWmAcYiZ-1
 name: Ethereal Management
 colors:
   surface: '#131314'
